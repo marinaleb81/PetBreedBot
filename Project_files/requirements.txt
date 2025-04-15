@@ -1,0 +1,14 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+pillow==10.1.0
+python-dotenv
+requests
+python-telegram-bot==20.0
+numpy==1.24.4
+torch==1.13.1
+torchvision==0.14.1
+timm
+python-multipart
+
+
+
