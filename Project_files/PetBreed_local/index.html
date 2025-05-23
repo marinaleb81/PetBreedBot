@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Найди Друга</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gicon.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="script.js?v=1"></script>
+    <link rel="icon" href="/icon/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+<div id="splash-screen" class="screen">
+    <img src="images/logo.png" alt="Логотип" class="logo">
+    <h1>Найди себе верного друга</h1>
+</div>
+
+<div id="role-selection-screen" class="screen content-screen hidden">
+    <img src="images/logo_secondary.png" alt="Логотип" class="logo small-logo">
+    <p id="user-greeting" style="font-size: 0.9em; margin-bottom: 15px;"></p>
+    <h2>Что вы хотите сделать?</h2>
+    <button id="find-pet-button" class="role-button">Найти питомца</button>
+    <button id="place-pet-button" class="role-button">Пристроить питомца</button>
+    <button id="find-mate-button" class="role-button">Найти пару</button>
+    <button id="identify-breed-button" class="role-button">Определить породу</button>
+    <hr style="width: 80%; margin: 25px auto; border: none; border-top: 1px solid #ccc;">
+    <button id="my-pets-nav-button" class="role-button">Мои объявления</button>
+    <button id="favorites-nav-button" class="role-button">Избранное</button>
+</div>
+
+<div id="animal-type-selection-find-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="role-selection-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Кого Вы ищете?</h2></div>
+        <button id="hamburger-button-find-type" class="hamburger-button" aria-label="Открыть меню"
+                aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+    <div class="animal-options">
+        <button id="select-dog-button-find" class="animal-button"><img src="images/dog.png" alt="Собака"></button>
+        <button id="select-cat-button-find" class="animal-button"><img src="images/cat.png" alt="Кошка"></button>
+    </div>
+</div>
+
+<div id="animal-type-selection-place-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="role-selection-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Кого Вы пристраиваете?</h2></div>
+        <button id="hamburger-button-place-type" class="hamburger-button" aria-label="Открыть меню"
+                aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+    <div class="animal-options">
+        <button id="select-dog-button-place" class="animal-button"><img src="images/dog.png" alt="Собака"></button>
+        <button id="select-cat-button-place" class="animal-button"><img src="images/cat.png" alt="Кошка"></button>
+    </div>
+</div>
+
+<div id="ad-form-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="animal-type-selection-place-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Новое объявление</h2></div>
+        <button id="hamburger-button-ad-form" class="hamburger-button" aria-label="Открыть меню" aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+
+    <div class="form-container" id="ad-form-container">
+        <p style="text-align: center; margin-bottom: 15px;">Тип животного: <strong id="ad-form-animal-type"></strong>
+        </p>
+
+        <div class="form-group">
+            <label for="ad-pet-name" class="form-label">Имя питомца:</label>
+            <input type="text" id="ad-pet-name" placeholder="Кличка (необязательно)" class="form-input">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Пол питомца:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="ad-pet-gender" value="М" checked> Мужской</label>
+                <label><input type="radio" name="ad-pet-gender" value="Ж"> Женский</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ad-pet-age" class="form-label">Возраст (лет):</label>
+            <input type="number" id="ad-pet-age" min="0" placeholder="Полных лет (0 - если меньше года)"
+                   class="form-input">
+        </div>
+
+        <div class="form-group">
+            <label for="ad-pet-breed" class="form-label">Порода:</label>
+            <input type="text" id="ad-pet-breed" placeholder="Например: Метис, Лабрадор" class="form-input">
+        </div>
+
+        <div class="form-group">
+            <label for="ad-pet-color" class="form-label">Окрас:</label>
+            <input type="text" id="ad-pet-color" placeholder="Например: Рыжий, Черный с белым" class="form-input">
+        </div>
+
+        <div id="ad-form-size-group" class="form-group hidden">
+            <label class="form-label">Размер питомца:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="ad-pet-size" value="Мелкий"> Мелкий</label>
+                <label><input type="radio" name="ad-pet-size" value="Средний" checked> Средний</label>
+                <label><input type="radio" name="ad-pet-size" value="Крупный"> Крупный</label>
+            </div>
+            <small>(Только для собак)</small></div>
+
+        <div class="form-group">
+            <label for="ad-pet-city" class="form-label">Город:</label>
+            <input type="text" id="ad-pet-city" placeholder="Город, где находится питомец" class="form-input">
+        </div>
+
+        <div class="form-group"><label class="form-label">Стерилизация/Кастрация:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="ad-pet-neutered" value="Да"> Да</label>
+                <label><input type="radio" name="ad-pet-neutered" value="Нет" checked> Нет</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Прививки по возрасту:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="ad-pet-vaccinated" value="Да" checked> Да</label>
+                <label><input type="radio" name="ad-pet-vaccinated" value="Нет"> Нет</label>
+            </div>
+        </div>
+
+        <!--        <div class="form-group">-->
+        <!--            <label class="form-label">Ключевые слова (теги):</label>-->
+        <!--            <div class="checkbox-group" id="ad-keywords-filter">-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="ласковый"> Ласковый</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="игривый"> Игривый</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="спокойный"> Спокойный</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="активный"> Активный</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="приучен к лотку"> Приучен к лотку</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="приучен к выгулу"> Приучен к выгулу</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="любит детей"> Ладит с детьми</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="для квартиры"> Для квартиры</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="для дома"> Для дома</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="умный"> Умный</label>-->
+        <!--                <label><input type="checkbox" name="ad-keyword" value="независимый"> Независимый</label>-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <div class="form-group">
+            <label class="form-label">Характеристики:</label>
+            <div class="keywords-tags-container" id="keywords-filter-tags">
+                <button type="button" class="keyword-tag-button" data-keyword-value="ласковый">Ласковый</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="игривый">Игривый</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="спокойный">Спокойный</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="активный">Активный</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="приучен к лотку">Приучен к лотку
+                </button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="приучен к выгулу">Приучен к
+                    выгулу
+                </button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="любит детей">Ладит с детьми
+                </button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="для квартиры">Для квартиры</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="для дома">Для дома</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="умный">Умный</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="независимый">Независимый</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ad-description" class="form-label">Описание:</label>
+            <textarea id="ad-description" rows="4" placeholder="Расскажите подробнее о питомце"
+                      class="form-input"></textarea>
+        </div>
+
+        <div class="form-group">
+            <!--            <label for="ad-image-upload" class="form-label">Фотография:</label>-->
+            <!--            <div id="ad-image-preview-container" style="margin-bottom: 5px; display: none;">-->
+            <!--                <img id="ad-image-preview" src="#" alt="Текущее фото"-->
+            <!--                     style="max-width: 150px; max-height: 150px; display: block; border-radius: 4px;">-->
+            <!--                <small>Текущее фото. Выберите новый файл, чтобы заменить его.</small>-->
+            <!--            </div>-->
+            <!--            <input type="file" id="ad-image-upload" accept="image/png, image/jpeg" class="form-input-file">-->
+            <label for="image-input-front" class="angle-upload-button" id="upload-label-front">
+                <div class="angle-upload-preview" id="preview-front"></div>
+                <img src="icon/upload-icon.svg" alt="Загрузить" class="upload-icon">
+                <span class="upload-text">Фото питомца</span>
+                <input type="file" id="image-input-front" accept="image/*" data-angle="front">
+            </label>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;"><label
+                style="display: flex; align-items: flex-start; cursor: pointer;">
+            <input type="checkbox" id="ad-consent-checkbox" name="ad-consent" required
+                   style="margin-top: 2px; margin-right: 8px; flex-shrink: 0;">
+            <span style="font-size: 0.9em; line-height: 1.4;">
+                    Я согласен(-на) получать запросы по моим объявлениям через Telegram от других пользователей сервиса.
+                </span>
+        </label>
+        </div>
+        <button id="create-ad-button" class="apply-button">Создать объявление</button>
+
+    </div>
+</div>
+
+<div id="results-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="animal-type-selection-find-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Найденные питомцы</h2></div>
+        <button id="hamburger-button-results" class="hamburger-button" aria-label="Открыть меню" aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+    <div id="results-list" class="results-list-container">
+        <p>Загрузка...</p>
+    </div>
+    <div id="swipe-view-container" class="swipe-container hidden">
+        <p>Загрузка карточек...</p>
+    </div>
+    <div class="results-footer">
+        <div class="footer-content">
+            <button id="filter-button" class="icon-button" title="Фильтры">
+                <img src="icon/filter-icon.svg" alt="Фильтры">
+            </button>
+            <button id="favorites-button" class="icon-button" title="Избранное">
+                <img src="icon/heart-icon.svg" alt="Избранное">
+            </button>
+            <button id="sort-button" class="icon-button" title="Сортировка">
+                <img src="icon/sort-icon.svg" alt="Сортировка">
+            </button>
+            <button id="view-toggle-button-results" class="icon-button view-toggle-button" title="Сменить вид"
+                    data-view-mode="list">
+                <img src="icon/view-list-icon.svg" alt="Вид списком" class="view-icon-list">
+                <img src="icon/view-grid-icon.svg" alt="Вид сеткой" class="view-icon-grid hidden">
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="my-pets-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="role-selection-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Мои объявления</h2></div>
+        <button id="hamburger-button-my-pets" class="hamburger-button" aria-label="Открыть меню" aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+    <div id="my-pets-list" class="my-pets-list-container">
+        <p>Загрузка ваших объявлений...</p>
+    </div>
+</div>
+
+<div id="favorites-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="results-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Избранное</h2></div>
+        <div class="header-controls-right">
+            <button id="view-toggle-button" class="icon-button view-toggle-button" title="Сменить вид"
+                    data-view-mode="grid">
+                <img src="icon/view-list-icon.svg" alt="Вид списком" class="view-icon-list">
+                <img src="icon/view-grid-icon.svg" alt="Вид сеткой" class="view-icon-grid hidden">
+            </button>
+            <button id="hamburger-button-favorites" class="hamburger-button" aria-label="Открыть меню"
+                    aria-expanded="false">
+                <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+                <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+            </button>
+        </div>
+    </div>
+    <div id="favorites-list" class="results-list-container view-mode-grid">
+        <p>Загрузка избранного...</p>
+    </div>
+</div>
+
+<div id="filter-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="role-selection-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Фильтры</h2></div>
+        <button id="hamburger-button-find-mate" class="hamburger-button" aria-label="Открыть меню"
+                aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+
+    <div class="filters-container">
+        <div class="filter-group">
+            <label class="filter-label">Пол:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="gender-filter" value="" checked> Любой</label>
+                <label><input type="radio" name="gender-filter" value="М"> Мужской</label>
+                <label><input type="radio" name="gender-filter" value="Ж"> Женский</label>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label for="age-filter" class="filter-label">Возраст (лет):</label>
+            <input type="number" id="age-filter" name="age-filter" min="0" placeholder="Любой возраст"
+                   class="filter-input">
+        </div>
+
+        <div class="filter-group">
+            <label for="breed-filter" class="filter-label">Порода:</label>
+            <input type="text" id="breed-filter" name="breed-filter" placeholder="Любая порода" class="filter-input">
+        </div>
+
+        <div class="filter-group">
+            <label for="color-filter" class="filter-label">Окрас:</label>
+            <input type="text" id="color-filter" name="color-filter" placeholder="Любой окрас" class="filter-input">
+        </div>
+
+        <div id="filter-form-size-group" class="filter-group hidden">
+            <label class="filter-label">Размер (только для собак):</label>
+            <div class="radio-group">
+                <label><input type="radio" name="size-filter" value="" checked> Любой</label>
+                <label><input type="radio" name="size-filter" value="маленький"> Маленький</label>
+                <label><input type="radio" name="size-filter" value="средний"> Средний</label>
+                <label><input type="radio" name="size-filter" value="большой"> Большой</label>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label for="city-filter" class="filter-label">Город:</label>
+            <select id="city-filter" name="city-filter" class="filter-input">
+                <option value="" selected>Любой город</option>
+            </select>
+        </div>
+
+        <div class="filter-group"><label class="filter-label">Стерилизация/Кастрация:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="neutered-filter" value="" checked> Не важно</label>
+                <label><input type="radio" name="neutered-filter" value="Да"> Да</label>
+                <label><input type="radio" name="neutered-filter" value="Нет"> Нет</label>
+            </div>
+        </div>
+        <div class="filter-group"><label class="filter-label">Прививки по возрасту:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="vaccinated-filter" value="" checked> Не важно</label>
+                <label><input type="radio" name="vaccinated-filter" value="Да"> Да</label>
+                <label><input type="radio" name="vaccinated-filter" value="Нет"> Нет</label>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Характеристики:</label>
+            <div class="keywords-tags-container" id="keywords-filter-tags">
+                <button type="button" class="keyword-tag-button" data-keyword-value="ласковый">Ласковый</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="игривый">Игривый</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="спокойный">Спокойный</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="активный">Активный</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="приучен к лотку">Приучен к лотку
+                </button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="приучен к выгулу">Приучен к
+                    выгулу
+                </button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="любит детей">Ладит с детьми
+                </button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="для квартиры">Для квартиры</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="для дома">Для дома</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="умный">Умный</button>
+                <button type="button" class="keyword-tag-button" data-keyword-value="независимый">Независимый</button>
+            </div>
+        </div>
+
+    </div>
+    <button id="apply-filters-button" class="apply-button">Применить фильтры</button>
+    <button id="reset-filters-button" class="reset-button secondary-button">Сбросить фильтры</button>
+
+</div>
+
+<div id="find-mate-form-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="role-selection-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Найти пару</h2></div>
+        <button id="hamburger-button-find-mate" class="hamburger-button" aria-label="Открыть меню"
+                aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+
+    <div class="form-container" id="find-mate-form-container">
+        <p style="text-align: center; margin-bottom: 15px;">Заполните данные вашего питомца, </br>которому ищете
+            пару:</p>
+
+        <div class="form-group">
+            <label for="image-input-find-mate" class="angle-upload-button" id="upload-label-find-mate">
+                <div class="angle-upload-preview" id="preview-find-mate"></div>
+                <img src="icon/upload-icon.svg" alt="Загрузить" class="upload-icon">
+                <span class="upload-text">Фото питомца</span>
+                <input type="file" id="image-input-find-mate" accept="image/*" required>
+            </label>
+            <small style="display: block; text-align: center; margin-top: 5px;">(Фото обязательно для поиска
+                пары)</small>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Тип животного:</label>
+            <div class="radio-group" id="find-mate-type-group">
+                <label><input type="radio" name="find-mate-animal-type" value="Кошка" checked required> Кошка</label>
+                <label><input type="radio" name="find-mate-animal-type" value="Собака" required> Собака</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Пол вашего питомца:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="find-mate-gender" value="М" checked required> Мальчик</label>
+                <label><input type="radio" name="find-mate-gender" value="Ж" required> Девочка</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="find-mate-nickname" class="form-label">Кличка:</label>
+            <input type="text" id="find-mate-nickname" placeholder="Кличка (необязательно)" class="form-input">
+        </div>
+
+        <div class="form-group">
+            <label for="find-mate-age" class="form-label">Возраст (полных лет):</label>
+            <input type="number" id="find-mate-age" min="1" placeholder="Минимум 1 год" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+            <label for="find-mate-breed" class="form-label">Порода:</label>
+            <input type="text" id="find-mate-breed" placeholder="Укажите породу" class="form-input" required>
+        </div>
+
+        <div class="form-group" id="find-mate-size-group" style="display: none;">
+            <label class="form-label">Размер (для собак):</label>
+            <div class="radio-group">
+                <label><input type="radio" name="find-mate-size" value="Мелкий"> Мелкий</label>
+                <label><input type="radio" name="find-mate-size" value="Средний" checked> Средний</label>
+                <label><input type="radio" name="find-mate-size" value="Крупный"> Крупный</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="find-mate-city" class="form-label">Город:</label>
+            <input type="text" id="find-mate-city" placeholder="Город (необязательно, если готовы ехать)"
+                   class="form-input">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Дополнительные отметки:</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="find-mate-pedigree" name="find-mate-checkbox"> Наличие
+                    родословной/документов</label>
+                <label><input type="checkbox" id="find-mate-vaccinations" name="find-mate-checkbox"> Все необходимые
+                    прививки сделаны</label>
+                <label><input type="checkbox" id="find-mate-experience" name="find-mate-checkbox"> Был(а) ли удачная
+                    вязка ранее?</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="find-mate-notes" class="form-label">Особенности здоровья/характера (необязательно):</label>
+            <textarea id="find-mate-notes" rows="3" placeholder="Краткий комментарий..." class="form-input"></textarea>
+        </div>
+
+        <button id="find-mate-submit-button" class="apply-button">Найти пару</button>
+
+    </div>
+</div>
+
+<div id="identify-breed-screen" class="screen content-screen hidden">
+    <div class="app-header">
+        <button class="back-button" data-target="role-selection-screen">
+            <img src="icon/back-arrow.svg" alt="Назад">
+        </button>
+        <div class="results-header"><h2>Определить породу</h2></div>
+        <button id="hamburger-button-identify" class="hamburger-button" aria-label="Открыть меню" aria-expanded="false">
+            <img src="icon/hamburger-icon.svg" alt="Меню" class="hamburger-icon">
+            <img src="icon/close-icon.svg" alt="Закрыть" class="close-icon">
+        </button>
+    </div>
+    <div class="form-container" style="text-align: center;">
+        <p style="font-size: 0.9em; margin-bottom: 20px;">Загрузите фото питомца с разных ракурсов для большей
+            точности:</p>
+        <div class="upload-area">
+            <label for="image-input-front-breed" class="angle-upload-button" id="upload-label-front-breed">
+                <div class="angle-upload-preview" id="preview-front-breed"></div>
+                <img src="icon/upload-icon.svg" alt="Загрузить" class="upload-icon">
+                <span class="upload-text">Вид спереди</span>
+                <input type="file" id="image-input-front-breed" accept="image/*" data-angle="front">
+            </label>
+            <label for="image-input-side-breed" class="angle-upload-button" id="upload-label-side-breed">
+                <div class="angle-upload-preview" id="preview-side-breed"></div>
+                <img src="icon/upload-icon.svg" alt="Загрузить" class="upload-icon">
+                <span class="upload-text">Вид сбоку</span>
+                <input type="file" id="image-input-side-breed" accept="image/*" data-angle="side">
+            </label>
+            <label for="image-input-top-breed" class="angle-upload-button" id="upload-label-top-breed">
+                <div class="angle-upload-preview" id="preview-top-breed"></div>
+                <img src="icon/upload-icon.svg" alt="Загрузить" class="upload-icon">
+                <span class="upload-text">Вид сверху</span>
+                <input type="file" id="image-input-top-breed" accept="image/*" data-angle="top">
+            </label>
+        </div>
+        <button id="submit-breed-multi-button" class="apply-button" style="margin-top: 25px;">Определить породу</button>
+        <div id="breed-result-output"
+             style="margin-top: 25px; text-align: center; font-weight: 500; min-height: 50px;"></div>
+        <div class="ad-block"
+             style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc; text-align: center;">
+            <p style="font-size: 0.9em; color: #555; margin-bottom: 5px;"> Здесь может быть ваша реклама 😉.</p>
+            <p style="font-size: 0.85em; color: #777;"> По вопросам сотрудничества пишите в <strong>Группу №5 (Проектный
+                практикум)</strong>.</p>
+        </div>
+    </div>
+</div>
+
+<div id="sort-menu" class="sort-menu hidden">
+    <button class="sort-option" data-sort-value="newest">Сначала новые</button>
+    <button class="sort-option" data-sort-value="oldest">Сначала старые</button>
+</div>
+
+<div id="menu-overlay" class="menu-overlay hidden"></div>
+
+<div id="main-menu" class="main-menu" aria-hidden="true">
+    <nav>
+        <ul>
+            <li>
+                <button class="menu-item" data-action="find"><img src="/icon/search-icon.svg" alt="Найти"><span>Найти питомца</span>
+                </button>
+            </li>
+
+            <li>
+                <button class="menu-item" data-action="place"><img src="/icon/add-circle-icon.svg"
+                                                                   alt="Пристроить"><span>Пристроить питомца</span>
+                </button>
+            </li>
+
+            <li>
+                <button class="menu-item" data-action="my-pets"><img src="/icon/list-alt-icon.svg" alt="Мои объявления"><span>Мои объявления</span>
+                </button>
+            </li>
+            <li>
+                <button class="menu-item" data-action="find-mate"><img src="/icon/pets-icon.svg" alt="Найти пару"><span>Найти пару</span>
+                </button>
+            </li>
+            <li>
+                <button class="menu-item" data-action="identify-breed"><img src="/icon/camera-icon.svg"
+                                                                            alt="Определить породу"><span>Определить породу</span>
+                </button>
+            </li>
+            <li>
+                <button class="menu-item" data-action="favorites"><img src="/icon/favorite-icon.svg"
+                                                                       alt="Избранное"><span>Избранное</span></button>
+            </li>
+            <li class="menu-item-separator-before">
+                <button class="menu-item" data-action="feedback"><img src="/icon/feedback-icon.svg"
+                                                                      alt="Обратная связь"><span>Обратная связь</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

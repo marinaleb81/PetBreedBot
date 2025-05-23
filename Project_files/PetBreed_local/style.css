@@ -1,0 +1,749 @@
+/* Общие стили style.css */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #FFFFFF;
+    color: #000000;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
+
+.screen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Экран загрузки --- */
+#splash-screen {
+    background-color: #F59245;
+    justify-content: center;
+}
+#splash-screen .logo {
+    max-width: 180px;
+    margin-bottom: 25px;
+}
+#splash-screen h1 {
+    color: #FFFFFF;
+}
+
+/* --- Контентные экраны --- */
+.content-screen {
+    background-color: #F5F5F7;
+    border: 3px solid #FE904B;
+    padding: 0 0 60px 0;
+}
+.content-screen > .results-list-container,
+.content-screen > .my-pets-list-container,
+.content-screen > .form-container,
+.content-screen > .filters-container {
+    margin-top: 70px; /* Высота шапки + отступ */
+    padding-bottom: 80px; /* Отступ для футера */
+    width: 80%;
+    box-sizing: border-box;
+}
+.content-screen > .animal-options {
+     margin-top: 70px;
+     padding-bottom: 80px;
+     width: 100%; /* Чтобы кнопки не сжимались */
+     padding-left: 10px; /* Отступы по бокам */
+     padding-right: 10px;
+     box-sizing: border-box;
+}
+
+/* --- Логотипы --- */
+.logo {
+    max-width: 150px;
+    margin-bottom: 20px;
+}
+.small-logo {
+     max-width: 80px;
+     margin-bottom: 15px;
+     margin-top: 15px;
+}
+
+/* --- Заголовки --- */
+h1 {
+    color: #000; text-align: center; font-family: 'Roboto', sans-serif;
+    font-size: 22px; font-style: normal; font-weight: 300;
+    line-height: normal; margin-bottom: 25px;
+}
+h2 {
+    color: #000; text-align: center; font-family: 'Roboto', sans-serif;
+    font-size: 18px; font-style: normal; font-weight: 300;
+    line-height: normal; margin-bottom: 25px;
+}
+p { margin-bottom: 15px; font-size: 0.9em; }
+
+/* --- Основные Кнопки --- */
+button {
+    width: 80%; max-width: 364px; height: 44px; padding: 0 15px; margin-bottom: 10px;
+    border: none; border-radius: 6px; background: #F59245; color: #FFFFFF;
+    font-family: 'Roboto', sans-serif; font-size: 1em; font-weight: 500; cursor: pointer;
+    transition: background-color 0.2s ease; flex-shrink: 0; display: inline-flex;
+    justify-content: center; align-items: center; text-align: center; vertical-align: middle;
+}
+button:hover { background-color: #e08034; }
+button:active { background-color: #c9702a; }
+.role-button { margin-bottom: 20px; }
+
+/* --- Кнопки выбора животного --- */
+.animal-options { display: flex; justify-content: space-around; }
+.animal-button {
+    width: 45%; display: flex; flex-direction: column; align-items: center;
+    height: 160px; padding: 15px; background-color: #FFFFFF !important; color: #000000 !important;
+    border-radius: 8px; margin-bottom: 10px;
+}
+.animal-button img { width: 80%; max-width: 100px; height: auto; margin-bottom: 10px; border-radius: 4px; }
+/*.animal-button span { font-weight: bold; }*/
+
+
+/* === Шапка Приложения (.app-header) === */
+.app-header {
+    position: sticky; top: 0; left: 0; right: 0; background-color: #ffffff; padding: 10px 15px;
+    display: flex; align-items: center; justify-content: space-between; z-index: 1001;
+    border-bottom: 1px solid #eee; min-height: 50px; box-sizing: border-box; width: 100%;
+}
+
+/* --- Кнопка "Назад" --- */
+.back-button {
+    position: static; background: #FE904B; border: none; border-radius: 8px;
+    width: 40px; height: 40px; padding: 0; color: #FFFFFF;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); cursor: pointer; transition: background-color 0.2s ease;
+    display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+}
+.back-button:hover { background: #e88340; }
+.back-button:active { background: #d07638; box-shadow: none; }
+.back-button img { /* Стили для IMG внутри кнопки Назад */
+    display: block;
+    width: 24px;
+    height: 24px;
+    /* Цвет должен быть задан в SVG как fill="#FFFFFF" */
+}
+
+/* --- Заголовок в шапке --- */
+.results-header {
+    flex-grow: 1; text-align: center; padding: 0 10px; overflow: hidden;
+}
+.results-header h2 {
+    margin: 0; font-size: 1.1em; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* --- Контейнер для правых кнопок в шапке --- */
+.header-controls-right {
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+
+/* --- Общий стиль для кнопок-иконок (справа в шапке, в футере) --- */
+.icon-button {
+    background: none; border: none; padding: 5px; margin: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; width: 40px; height: 40px;
+    color: #333; /* Цвет по умолчанию для SVG с currentColor */
+    transition: background-color 0.2s ease;
+}
+.icon-button:hover { background-color: rgba(0, 0, 0, 0.05); }
+.icon-button img { /* Стили для IMG внутри .icon-button */
+    display: block;
+    width: 24px;
+    height: 24px;
+    /* Цвет управляется через 'color' родителя, если SVG использует currentColor,
+       ИЛИ жестко задан в самом SVG */
+}
+
+/* --- Кнопка смены вида --- */
+.view-toggle-button {
+    /* Наследует .icon-button */
+    color: #000; /* Цвет для иконок view-list/grid, если они используют currentColor */
+}
+.view-toggle-button img { /* Размеры наследуются от .icon-button img */ }
+.view-toggle-button .view-icon-grid.hidden,
+.view-toggle-button .view-icon-list.hidden { display: none; }
+
+/* --- Кнопка Гамбургер --- */
+.hamburger-button {
+    position: static; flex-shrink: 0; width: 40px; height: 40px; padding: 0;
+    border: none; border-radius: 8px; background: #FE904B; color: #FFFFFF;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); cursor: pointer; transition: background-color 0.2s ease;
+    display: flex; justify-content: center; align-items: center; z-index: 2101;
+}
+.hamburger-button:hover { background: #e88340; }
+.hamburger-button:active { background: #d07638; box-shadow: none; }
+.hamburger-button img { /* Стили для IMG внутри гамбургера */
+   display: block;
+   width: 24px;
+   height: 24px;
+   /* Цвет должен быть задан в SVG как fill="#FFFFFF" */
+}
+.hamburger-button .close-icon { display: none; }
+.hamburger-button.is-active .hamburger-icon { display: none; }
+.hamburger-button.is-active .close-icon { display: block; }
+
+
+/* --- Футер Экрана Результатов --- */
+.results-footer {
+    position: fixed; bottom: 0; left: 0; right: 0; width: 100%;
+    background-color: #ffffff; border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1); padding: 0;
+    box-sizing: border-box; z-index: 10;
+}
+.footer-content {
+    width: 100%; max-width: 380px; margin: 0 auto; display: flex;
+    justify-content: space-around; align-items: center; padding: 8px 10px; box-sizing: border-box;
+}
+.results-footer .icon-button img {
+    width: 26px;
+    height: 26px;
+}
+/* Удаляем фиксированные отступы, так как теперь используем space-around */
+.footer-content .icon-button:nth-child(2),
+.footer-content .icon-button:nth-child(3) {
+    margin-left: 0;
+}
+
+/* --- Стили для переключения вида в Найденные питомцы --- */
+#results-list.view-mode-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+#results-list.view-mode-list .pet-card {
+    width: 100%;
+    max-width: 380px;
+}
+#results-list.view-mode-list .pet-card-image {
+    height: 180px;
+}
+#results-list.view-mode-list .pet-card-info {
+    padding: 0;
+    flex-grow: 1;
+}
+#results-list.view-mode-list .pet-card-name {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin: 0 0 4px 0; /* Уменьшаем отступ снизу */
+}
+#results-list.view-mode-list .pet-card-details {
+    font-size: 0.85em;
+    color: #555;
+    margin: 0 0 4px 0; /* Уменьшаем отступ снизу */
+}
+#results-list.view-mode-list .pet-card-health-status {
+    font-size: 0.85em;
+    color: #555;
+    margin: 0 0 4px 0; /* Уменьшаем отступ снизу */
+}
+#results-list.view-mode-list .pet-card-description {
+    display: block;
+    font-size: 0.9em;
+    color: #333;
+    line-height: 1.4;
+    margin: 0 0 8px 0; /* Уменьшаем отступ снизу */
+}
+#results-list.view-mode-list .contact-button {
+    display: inline-flex;
+}
+
+#results-list.view-mode-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+#results-list.view-mode-grid .pet-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    max-width: 380px;
+    margin-bottom: 0;
+}
+#results-list.view-mode-grid .pet-card-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-right: 12px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+#results-list.view-mode-grid .pet-card-info {
+    padding: 0;
+}
+#results-list.view-mode-grid .pet-card-name {
+    font-size: 0.9em;
+    margin-bottom: 2px;
+}
+#results-list.view-mode-grid .pet-card-details {
+    font-size: 0.7em;
+    margin-bottom: 2px;
+}
+
+#results-list.view-mode-grid .pet-card-health-status {
+    font-size: 0.8em; /* Уменьшаем шрифт */
+    color: #555;
+    margin-bottom: 2px; /* Уменьшаем отступ */
+}
+
+#results-list.view-mode-grid .pet-card-description {
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+    line-height: 1.3;
+    margin: 0;
+    overflow: hidden;
+    /* Убираем ограничение на одну строку */
+    white-space: normal; /* Разрешаем перенос текста */
+    max-height: 2.6em; /* Ограничиваем высоту (2 строки) */
+}
+
+#results-list.view-mode-grid .pet-card-details {
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+    line-height: 1.3;
+    margin: 0;
+    overflow: hidden;
+    /* Убираем ограничение на одну строку */
+    white-space: normal; /* Разрешаем перенос текста */
+    max-height: 2.6em; /* Ограничиваем высоту (2 строки) */
+}
+
+#results-list.view-mode-grid .contact-button {
+    display: inline-flex; /* Включаем кнопку */
+    padding: 4px 10px; /* Уменьшаем внутренние отступы */
+    height: 28px; /* Уменьшаем высоту */
+    font-size: 0.85em; /* Уменьшаем размер текста */
+    border-radius: 4px; /* Слегка скругляем углы */
+    background-color: #FE904B; /* Цвет из общих стилей кнопок */
+    color: #FFFFFF; /* Белый текст */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+#results-list.view-mode-grid .contact-button:hover {
+    background-color: #e88340; /* Легкий эффект при наведении */
+}
+#results-list.view-mode-grid .favorite-button {
+    position: static;
+    margin-left: auto;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+    background: none;
+    box-shadow: none;
+}
+#results-list.view-mode-grid .favorite-button img {
+    position: static;
+    transform: none;
+    width: 20px;
+    height: 20px;
+}
+
+/* --- Меню Сортировки --- */
+/* Стили для меню сортировки */
+.sort-menu {
+    position: fixed; /* Фиксируем относительно окна */
+    bottom: 65px; /* Позиция над футером (подберите значение) */
+    /* Центрируем по горизонтали */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; /* Ширина меню */
+    max-width: 360px; /* Максимальная ширина */
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 15; /* Выше футера, но ниже возможных модальных окон */
+    padding: 5px;
+    box-sizing: border-box;
+}
+.sort-menu.hidden { display: none; }
+/* Стили для кнопок-опций внутри меню */
+.sort-menu .sort-option {
+    display: block; /* Каждая опция на новой строке */
+    width: 100%;
+    padding: 10px 15px;
+    background-color: transparent;
+    border: none;
+    text-align: left; /* Текст опции слева */
+    font-size: 1em;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px; /* Небольшое скругление */
+    margin: 0; /* Убираем лишние отступы */
+}
+.sort-menu .sort-option:hover { background-color: #f0f0f0; }
+.sort-menu .sort-option.active { font-weight: bold; color: #FE904B; background-color: #fff1e6; }
+
+/* --- Карточки Питомцев --- */
+/* Стили для карточки питомца */
+.pet-card {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    overflow: hidden;
+
+    /* ДОБАВЛЯЕМ РАЗМЕРЫ И ОТСТУП */
+    width: 100%; /* Занимает доступную ширину в flex-контейнере */
+    max-width: 380px; /* Ограничиваем максимальную ширину карточки */
+    margin-bottom: 15px; /* Добавляем отступ снизу между карточками */
+    box-sizing: border-box; /* Учитываем padding/border в ширине */
+}
+.pet-card-image { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
+.pet-card-info { flex-grow: 1; text-align: left; }
+.pet-card-name { font-size: 1.1em; font-weight: 500; margin: 0 0 4px 0; } /* Уменьшен отступ */
+.pet-card-details { font-size: 0.85em; color: #555; margin: 0 0 4px 0; } /* Уменьшен отступ */
+.pet-card-health-status { font-size: 0.85em; color: #555; margin: 0 0 4px 0; } /* Добавлен стиль с уменьшенным отступом */
+.pet-card-description { font-size: 0.9em; color: #333; line-height: 1.4; margin: 0 0 8px 0; } /* Уменьшен отступ */
+
+.favorite-button { /* Кнопка лайка на карточке */
+    position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.7);
+    border: none; border-radius: 50%; width: 36px; height: 36px; padding: 0; cursor: pointer;
+    display: flex; justify-content: center; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+/* Стили для ДВУХ img внутри кнопки лайка */
+.favorite-button img { /* Теперь это будет .favorite-icon */
+    width: 20px; height: 20px; display: block; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+/*.favorite-button .favorite-icon-outline { display: block; } /* Контур виден по умолчанию */
+/*.favorite-button .favorite-icon-filled { display: none; }  /* Залитое скрыто по умолчанию */
+/* Когда у КНОПКИ есть класс is-favorite */
+/*.favorite-button.is-favorite .favorite-icon-outline { display: none; }  /* Скрываем контур */
+/*.favorite-button.is-favorite .favorite-icon-filled { display: block; } /* Показываем залитое */
+
+/* --- Экран Фильтров --- */
+.filters-container { max-width: 360px; margin: 0 auto; padding: 15px; box-sizing: border-box; text-align: left; flex-grow: 1; overflow-y: auto; }
+.filter-group { margin-bottom: 20px; }
+.filter-label { display: block; font-weight: 500; margin-bottom: 8px; color: #333; }
+.filter-input { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
+.radio-group label, .checkbox-group label { display: block; margin-bottom: 8px; cursor: pointer; font-weight: 400; }
+.radio-group input[type="radio"], .checkbox-group input[type="checkbox"] { margin-right: 8px; cursor: pointer; vertical-align: middle; }
+#filter-screen .apply-button { margin-top: 15px; margin-bottom: 5px; }
+#filter-screen .reset-button { background-color: transparent; color: #555; border: 1px solid #ccc; width: 100%; max-width: 364px; height: 44px; padding: 0 15px; margin-bottom: 10px; border-radius: 6px; font-size: 0.9em; font-weight: 500; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; text-align: center; vertical-align: middle; }
+#filter-screen .reset-button:hover { background-color: rgba(0, 0, 0, 0.05); }
+.keywords-tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+.keyword-tag-button { margin: 0; border: 1px solid #FE904B; background-color: #ffffff; color: #000000; border-radius: 16px; padding: 6px 14px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; text-decoration: none; display: inline-block; width: auto; max-width: none; height: auto; justify-content: initial; align-items: initial; vertical-align: baseline; flex-shrink: initial; }
+.keyword-tag-button:hover, .keyword-tag-button:active { background-color: #fff8f2; border-color: #e88340; }
+.keyword-tag-button.active { background-color: #FE904B; color: #ffffff; border-color: #FE904B; }
+.keyword-tag-button.active:hover { background-color: #e08034; border-color: #e08034; }
+
+/* --- Свайп (без изменений, стили для SVG внутри удалены, т.к. там img) --- */
+/* Стили .pet-card--swipe, .pet-card--swipe .pet-card-image, .pet-card--swipe .pet-card-info и т.д. остаются */
+/* Правило .pet-card--swipe .favorite-button img нужно проверить/добавить */
+.pet-card--swipe .favorite-button img {
+     /* Убедитесь, что цвет (вероятно белый/красный) задан в SVG файлах heart-outline/heart-filled */
+     /* Размеры уже должны быть заданы общим правилом .favorite-button img */
+}
+
+/* --- Мои объявления --- */
+.my-pets-list-container { max-width: 380px; margin: 15px auto 0 auto; padding: 0 10px; box-sizing: border-box; }
+.my-pet-card { display: flex; flex-direction: row; background-color: #fff; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: visible; position: relative; }
+.my-pet-card .my-pet-card-image { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; margin-right: 15px; flex-shrink: 0; }
+.my-pet-card .my-pet-card-info { flex-grow: 1; text-align: left; display: flex; flex-direction: column; justify-content: center; }
+.my-pet-card .my-pet-card-name { font-size: 1.1em; font-weight: 500; margin: 0 0 5px 0; }
+.my-pet-card .my-pet-card-details { font-size: 0.85em; color: #555; margin: 0 0 8px 0; }
+.my-pet-card .my-pet-card-description { display: none; }
+.my-pet-card-menu-toggle { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; padding: 4px; border: none; background-color: rgba(255, 255, 255, 0.8); border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 5; transition: background-color 0.2s ease; }
+.my-pet-card-menu-toggle:hover { background-color: rgba(230, 230, 230, 0.9); }
+.my-pet-card-menu-toggle img { /* Стили для IMG иконки "три точки" */
+    width: 20px; height: 20px;
+    /* Цвет должен быть задан в SVG как fill="#333" или stroke="#333" */
+}
+.my-pet-card-menu { position: absolute; top: 40px; right: 8px; background-color: #ffffff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); padding: 5px 0; z-index: 10; min-width: 140px; overflow: hidden; }
+.my-pet-card-menu.hidden { display: none; }
+.my-pet-menu-option { display: block; width: 100%; padding: 8px 15px; background: none; border: none; text-align: left; font-size: 0.95em; color: #333; cursor: pointer; white-space: nowrap; }
+.my-pet-menu-option:hover { background-color: #f5f5f5; }
+.my-pet-menu-option.delete-button { color: #D32F2F; }
+.my-pet-menu-option.delete-button:hover { background-color: #FFEBEE; }
+
+/* --- Основное Меню --- */
+.main-menu { position: fixed; top: 3px; right: -300px; width: 250px; height: 100%; background-color: #fff; box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15); z-index: 1000; transition: right 0.3s ease-in-out; overflow-y: auto; padding-top: 70px; }
+.main-menu.is-open { right: 0; }
+.main-menu ul { list-style: none; padding: 0; margin: 0; }
+.main-menu li { border-bottom: 1px solid #eee; }
+.main-menu li:last-child { border-bottom: none; }
+.main-menu .menu-item { display: flex; align-items: center; justify-content: flex-start; width: 100%; padding: 10px 15px; font-size: 1em; color: #333; background: none; border: none; text-align: left; cursor: pointer; transition: background-color 0.2s ease; }
+.main-menu .menu-item img { /* Стили для IMG иконок в меню */
+    flex-shrink: 0; width: 20px; height: 20px; margin-right: 12px;
+    /* Цвет должен управляться через currentColor в SVG и 'color' родителя (.menu-item) */
+    color: inherit; /* Явно наследуем цвет */
+}
+.main-menu .menu-item:hover { background-color: #f8f8f8; }
+.main-menu li.menu-item-separator-before { border-top: 1px solid #ddd; margin-top: 8px; padding-top: 8px; }
+.menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); z-index: 999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+.menu-overlay.is-visible { opacity: 1; visibility: visible; }
+
+/* --- Загрузка Фото по Ракурсам --- */
+.upload-area { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
+.angle-upload-button { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 364px; height: 88px; background-color: #f8f8f8; border: 3px solid #F59245; border-radius: 8px; cursor: pointer; position: relative; overflow: hidden; transition: background-color 0.2s ease; box-sizing: border-box; color: #333; }
+.angle-upload-button:hover { background-color: #eee; }
+.angle-upload-button input[type="file"] { display: none; }
+.angle-upload-button .upload-icon { /* Стиль для IMG иконки плюса */
+    width: 32px; height: 32px; margin-bottom: 5px; transition: transform 0.2s ease;
+    /* Цвет (fill) должен быть задан в SVG файле upload-icon.svg */
+}
+.angle-upload-button .upload-text { font-size: 0.95em; font-weight: 500; }
+.angle-upload-preview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; opacity: 0; transition: opacity 0.3s ease; z-index: 1; }
+.angle-upload-button.has-file .angle-upload-preview { opacity: 0.6; }
+.angle-upload-button.has-file .upload-icon { transform: scale(0.8); }
+.angle-upload-button.has-file .upload-text { font-size: 0.8em; background-color: rgba(255, 255, 255, 0.7); padding: 2px 5px; border-radius: 3px; z-index: 2; }
+
+/* --- Избранное: Стили для переключения Grid/List --- */
+#favorites-list.view-mode-grid { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+#favorites-list.view-mode-grid .pet-card { width: 100%; max-width: 360px; }
+#favorites-list.view-mode-grid .pet-card-image { height: 180px; }
+#favorites-list.view-mode-grid .pet-card-description { display: block; }
+#favorites-list.view-mode-grid .contact-button { display: inline-flex; }
+
+#favorites-list.view-mode-list { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+#favorites-list.view-mode-list .pet-card { flex-direction: row; align-items: center; padding: 10px; max-width: 380px; margin-bottom: 0; }
+#favorites-list.view-mode-list .pet-card-image { width: 60px; height: 60px; object-fit: cover; border-radius: 50%; margin-right: 12px; margin-bottom: 0; flex-shrink: 0; }
+#favorites-list.view-mode-list .pet-card-info { padding: 0; }
+#favorites-list.view-mode-list .pet-card-name { font-size: 1em; margin-bottom: 2px; }
+#favorites-list.view-mode-list .pet-card-details { font-size: 0.85em; margin-bottom: 2px; }
+#favorites-list.view-mode-list .pet-card-health-status { font-size: 0.8em; margin-bottom: 2px; }
+#favorites-list.view-mode-list .pet-card-description { display: none; }
+#favorites-list.view-mode-list .contact-button { display: none; }
+#favorites-list.view-mode-list .favorite-button { /* Переопределение для режима списка */
+    position: static; margin-left: auto; padding: 5px; width: 30px; height: 30px; background: none; box-shadow: none;
+}
+#favorites-list.view-mode-list .favorite-button img { /* Теперь это будет .favorite-icon */
+     position: static; transform: none; width: 20px; height: 20px;
+ }
+/* Стили видимости .favorite-icon-outline/filled остаются общими */
+
+/* Стили для контейнеров форм (учитываем новый стиль из .content-screen) */
+.filters-container,
+.form-container {
+    width: 80%; /* Из нового style.css */
+    max-width: 360px; /* Сохраняем ограничение ширины */
+    margin: 0 auto;
+    /*margin-top: 70px; /* Из нового style.css */
+    margin-top: 10px !important;
+    padding: 15px;
+    padding-bottom: 80px; /* Из нового style.css */
+    box-sizing: border-box;
+    text-align: left;
+    flex-grow: 1; /* Сохраняем для корректного поведения */
+    overflow-y: auto; /* Сохраняем для длинных форм */
+}
+
+/* Стили для групп полей */
+.filter-group {
+    margin-bottom: 20px; /* Из нового style.css */
+}
+.form-group {
+    margin-bottom: 15px; /* Оставляем как в старом */
+}
+
+/* Стили для меток полей */
+.filter-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px; /* Из нового style.css */
+    color: #333;
+}
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px; /* Оставляем как в старом */
+    color: #333;
+}
+
+/* Стили для текстовых полей и textarea */
+.filter-input,
+.form-input,
+#ad-description {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    font-family: inherit; /* Сохраняем */
+}
+#ad-description {
+    resize: vertical; /* Сохраняем */
+}
+
+/* Стили для радио-кнопок и чекбоксов */
+.radio-group label,
+.checkbox-group label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-weight: 400;
+}
+.radio-group input[type="radio"],
+.checkbox-group input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Стили для контейнера тегов-кнопок */
+.keywords-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+/* Стиль для кнопки-тега */
+.keyword-tag-button {
+    margin: 0;
+    border: 1px solid #FE904B;
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    width: auto;
+    max-width: none;
+    height: auto;
+    justify-content: initial;
+    align-items: initial;
+    vertical-align: baseline;
+    flex-shrink: initial;
+}
+.keyword-tag-button:hover,
+.keyword-tag-button:active {
+    background-color: #fff8f2;
+    border-color: #e88340;
+}
+.keyword-tag-button.active {
+    background-color: #FE904B;
+    color: #ffffff;
+    border-color: #FE904B;
+}
+.keyword-tag-button.active:hover {
+    background-color: #e08034;
+    border-color: #e08034;
+}
+
+/* Стили для кнопок внизу экрана фильтров */
+#filter-screen .apply-button {
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+#filter-screen .reset-button {
+    background-color: transparent;
+    color: #555;
+    border: 1px solid #ccc;
+    width: 80%;
+    max-width: 364px;
+    height: 44px;
+    padding: 0 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
+}
+#filter-screen .reset-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Стили для кнопки на экране создания объявления */
+#ad-form-screen .apply-button {
+    margin-top: 20px; /* Сохраняем */
+}
+
+/* Стили для области загрузки фото по ракурсам */
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+.angle-upload-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 364px;
+    height: 88px;
+    background-color: #f8f8f8;
+    border: 3px solid #F59245;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+    color: #333;
+}
+.angle-upload-button:hover {
+    background-color: #eee;
+}
+.angle-upload-button input[type="file"] {
+    display: none;
+}
+.angle-upload-button .upload-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 5px;
+    transition: transform 0.2s ease;
+}
+.angle-upload-button .upload-text {
+    font-size: 0.95em;
+    font-weight: 500;
+}
+.angle-upload-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+.angle-upload-button.has-file .angle-upload-preview {
+    opacity: 0.6;
+}
+.angle-upload-button.has-file .upload-icon {
+    transform: scale(0.8);
+}
+.angle-upload-button.has-file .upload-text {
+    font-size: 0.8em;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2px 5px;
+    border-radius: 3px;
+    z-index: 2;
+}

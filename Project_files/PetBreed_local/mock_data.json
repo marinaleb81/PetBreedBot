@@ -1,0 +1,206 @@
+[
+    {
+        "id": 1,
+        "user_id": 101,
+        "pet_id": 201,
+        "keywords": "ласковый, игривый, приучен к лотку",
+        "description": "Очаровательный рыжий котенок ищет дом. Очень любит играть и сидеть на ручках. Лоток знает на отлично.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-24T10:00:00Z",
+        "image_path": "images/pet1.jpeg",
+        "isFavorite": true,
+        "city": "Москва",
+        "user": { "id": 101, "username": "Anna", "email": "anna@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 201, "animal_type": "Кошка", "name": "Рыжик", "gender": "М", "age": 1, "breed": "Метис", "color": "Рыжий",
+            "isNeutered": false, "isVaccinated": true, "size": null
+        }
+    },
+    {
+        "id": 2,
+        "user_id": 102,
+        "pet_id": 202,
+        "keywords": "активный, умный, любит детей, для дома",
+        "description": "Молодой пес (2 года) ищет активных хозяев. Отлично ладит с детьми, знает базовые команды. Нуждается в длительных прогулках.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-23T15:30:00Z",
+        "image_path": "images/pet2.jpeg",
+        "isFavorite": false,
+        "city": "Санкт-Петербург",
+        "user": { "id": 102, "username": "Boris", "email": "boris@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 202, "animal_type": "Собака", "name": "Джек", "gender": "М", "age": 2, "breed": "Лабрадор ретривер", "color": "Палевый",
+            "isNeutered": false, "isVaccinated": true, "size": "большой"
+        }
+    },
+    {
+        "id": 3,
+        "user_id": 103,
+        "pet_id": 203,
+        "keywords": "спокойная, ласковая, для квартиры",
+        "description": "Взрослая стерилизованная кошка (5 лет). Очень спокойная и ненавязчивая, идеально подойдет для жизни в квартире.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-22T11:00:00Z",
+        "image_path": "images/pet3.jpeg",
+        "isFavorite": false,
+        "city": "Москва",
+        "user": { "id": 103, "username": "Elena", "email": "elena@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 203, "animal_type": "Кошка", "name": "Муся", "gender": "Ж", "age": 5, "breed": "Британская короткошерстная", "color": "Голубой",
+            "isNeutered": true, "isVaccinated": false, "size": null
+        }
+    },
+    {
+        "id": 4,
+        "user_id": 101,
+        "pet_id": 204,
+        "keywords": "маленький, активный, щенок, приучен к выгулу",
+        "description": "Щенок метис, 3 месяца. Очень энергичный и любопытный. Нуждается в воспитании.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-25T09:15:00Z",
+        "image_path": "images/pet4.jpeg",
+        "isFavorite": false,
+        "city": "Санкт-Петербург",
+        "user": { "id": 101, "username": "Anna", "email": "anna@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 204, "animal_type": "Собака", "name": "Тоби", "gender": "М", "age": 0, "breed": "Метис", "color": "Белый с рыжим",
+            "isNeutered": false, "isVaccinated": true, "size": "маленький"
+        }
+    },
+    {
+        "id": 5,
+        "user_id": 104,
+        "pet_id": 205,
+        "keywords": "независимая, пушистая, стерилизована",
+        "description": "Красивая сибирская кошка ищет дом без других животных. Немного независима, но любит ласку, когда сама захочет.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-20T18:00:00Z",
+        "image_path": "images/pet5.jpeg",
+        "isFavorite": true,
+        "city": "Москва",
+        "user": { "id": 104, "username": "Victor", "email": "victor@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 205, "animal_type": "Кошка", "name": "Алиса", "gender": "Ж", "age": 3, "breed": "Сибирская", "color": "Трехцветная",
+            "isNeutered": true, "isVaccinated": true, "size": null
+        }
+    },
+    {
+        "id": 6,
+        "user_id": 102,
+        "pet_id": 206,
+        "keywords": "крупный, добрый, охранник, для дома",
+        "description": "Немецкая овчарка, 4 года. Умный и преданный пес, хороший охранник. Желательно в частный дом.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-19T12:45:00Z",
+        "image_path": "images/pet6.jpeg",
+        "isFavorite": false,
+        "city": "Санкт-Петербург",
+        "user": { "id": 102, "username": "Boris", "email": "boris@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 206, "animal_type": "Собака", "name": "Гром", "gender": "М", "age": 4, "breed": "Немецкая овчарка", "color": "Чепрачный",
+            "isNeutered": false, "isVaccinated": true, "size": "большой"
+        }
+    },
+    {
+        "id": 7,
+        "user_id": 105,
+        "pet_id": 207,
+        "keywords": "пожилой, спокойный, тихий, для квартиры",
+        "description": "Пожилой пес-метис (10 лет) ищет спокойный дом. Кастрирован. Любит спать и наблюдать.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-18T10:00:00Z",
+        "image_path": "images/pet7.jpeg",
+        "isFavorite": false,
+        "city": "Москва",
+        "user": { "id": 105, "username": "Maria", "email": "maria@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 207, "animal_type": "Собака", "name": "Барсик", "gender": "М", "age": 10, "breed": "Метис", "color": "Черный",
+            "isNeutered": true, "isVaccinated": false, "size": "средний"
+        }
+    },
+    {
+        "id": 8,
+        "user_id": 105,
+        "pet_id": 208,
+        "keywords": "метис, среднего размера, игривая, приучен к выгулу",
+        "description": "Собака-девочка, метис, возраст около 1 года. Очень активная и игривая, нужен хозяин, готовый заниматься.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-25T11:00:00Z",
+        "image_path": "images/pet8.jpeg",
+        "isFavorite": false,
+        "city": "Санкт-Петербург",
+        "user": { "id": 105, "username": "Maria", "email": "maria@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 208, "animal_type": "Собака", "name": "Найда", "gender": "Ж", "age": 1, "breed": "Метис", "color": "Рыжий с белым",
+            "isNeutered": false, "isVaccinated": true, "size": "средний"
+        }
+    },
+    {
+        "id": 9,
+        "user_id": 101,
+        "pet_id": 209,
+        "keywords": "сфинкс, без шерсти, гипоаллергенный?",
+        "description": "Кот породы сфинкс, 2 года. Ласковый и общительный. Требует специального ухода за кожей.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-17T14:20:00Z",
+        "image_path": "images/pet9.jpeg",
+        "isFavorite": false,
+        "city": "Москва",
+        "user": { "id": 101, "username": "Anna", "email": "anna@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 209, "animal_type": "Кошка", "name": "Зефир", "gender": "М", "age": 2, "breed": "Донской сфинкс", "color": "Розовый",
+            "isNeutered": true, "isVaccinated": false, "size": null
+        }
+    },
+    {
+        "id": 10,
+        "user_id": 102,
+        "pet_id": 210,
+        "keywords": "маленькая, диванная, пожилая, спокойная",
+        "description": "Маленькая собачка, метис, 12 лет. Спокойная, любит сидеть на ручках. Идеальна для пожилых людей.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-16T09:00:00Z",
+        "image_path": "images/pet10.jpeg",
+        "isFavorite": true,
+        "city": "Санкт-Петербург",
+        "user": { "id": 102, "username": "Boris", "email": "boris@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 210, "animal_type": "Собака", "name": "Кнопка", "gender": "Ж", "age": 12, "breed": "Метис", "color": "Черный с подпалом",
+            "isNeutered": true, "isVaccinated": true, "size": "маленький"
+        }
+    },
+    {
+        "id": 11,
+        "user_id": 103,
+        "pet_id": 211,
+        "keywords": "котенок, игривый, пушистый",
+        "description": "Черный пушистый котенок, 2 месяца. Активный и любознательный.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-25T12:00:00Z",
+        "image_path": "images/pet11.jpeg",
+        "isFavorite": false,
+        "city": "Москва",
+        "user": { "id": 103, "username": "Elena", "email": "elena@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 211, "animal_type": "Кошка", "name": null, "gender": "М", "age": 0, "breed": "Метис", "color": "Черный",
+            "isNeutered": false, "isVaccinated": true, "size": null
+        }
+    },
+    {
+        "id": 12,
+        "user_id": 104,
+        "pet_id": 212,
+        "keywords": "умный, активный, метис, охранник",
+        "description": "Метис, кобель, около 3 лет. Очень умный, легко обучается, энергичный.",
+        "status": "опубликовано",
+        "timestamp": "2025-04-25T14:00:00Z",
+        "image_path": "images/pet12.jpeg",
+        "isFavorite": false,
+        "city": "Санкт-Петербург",
+        "user": { "id": 104, "username": "Victor", "email": "victor@example.com", "status": "Пристраивающий" },
+        "pet": {
+            "id": 212, "animal_type": "Собака", "name": "Рэй", "gender": "М", "age": 3, "breed": "Метис", "color": "Черный",
+            "isNeutered": false, "isVaccinated": false, "size": "большой"
+        }
+    }
+]
