@@ -4,10 +4,11 @@
 //const BACKEND_BASE_URL = 'https://i-love-pets.ru/'; // <-- УСТАНОВИТЕ ПРАВИЛЬНЫЙ URL ДЛЯ ТЕСТА
 //const BACKEND_BASE_URL = ''; // <-- Для продакшена на том же домене
 const BACKEND_BASE_URL = 'https://i-love-pets.ru';
-let authToken = null;
-let isAuthenticated = false;
+let authToken = localStorage.getItem('api_access_token') || null; // Загружаем токен при старте
+let isAuthenticated = !!authToken; // Устанавливаем состояние аутентификации
 // eslint-disable-next-line no-unused-vars
 let userRole = null;
+let logoutButton = null;
 let animalType = null;
 let currentFilters = {};
 let currentSort = 'newest';
@@ -21,6 +22,11 @@ let favoriteAnnouncementIds = new Set();
 let isMenuOpen = false; // Глобальная переменная состояния меню
 // -------------------------------------------------
 
+// --- Конфигурация для Telegram Website Login ---
+const TELEGRAM_BOT_USERNAME = "PetBreedBot";
+const TELEGRAM_AUTH_CALLBACK_URL = "https://i-love-pets.ru/api/v1/auth/telegram/callback";
+
+// -------------------------------------------------
 
 // === ГЛОБАЛЬНЫЕ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
 // (Эти функции доступны везде и могут быть объявлены здесь)
@@ -312,11 +318,19 @@ function toggleMenu(buttonElement) {
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Фаза 1: Инициализация и Выборка Элементов ---
+    console.log("DOM загружен, инициализация приложения...");
+    handleWebsiteTelegramAuthCallback(); // Обработает редирект с токеном, если он есть
+    updateWebsiteLoginState();
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    console.log("DOM загружен, Telegram Web App инициализируется...");
+    if (tg && typeof tg.ready === 'function') {
+        tg.ready();
+    }
 
+    logoutButton = document.getElementById('logout-button');
+    // ...
+    if (logoutButton) {
+        logoutButton.addEventListener('click', websiteLogout);
+    }
     // Основные элементы интерфейса
     const splashScreen = document.getElementById('splash-screen');
     const mainMenu = document.getElementById('main-menu');
@@ -381,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const frontInput = document.getElementById('image-input-front');
     const sideInput = document.getElementById('image-input-side');
     const topInput = document.getElementById('image-input-top');
+
     const submitBreedMultiButton = document.getElementById('submit-breed-multi-button');
     const breedResultOutputMulti = document.getElementById('breed-result-output');
 
@@ -686,29 +701,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function resetFilterForm(formContainer) {
-    if (!formContainer) {
-        console.warn("filtersContainer не найден, пропускаем сброс фильтров");
-        return;
+        if (!formContainer) {
+            console.warn("filtersContainer не найден, пропускаем сброс фильтров");
+            return;
+        }
+        const genderRadio = formContainer.querySelector('input[name="gender-filter"][value=""]');
+        if (genderRadio) genderRadio.checked = true;
+        const ageInput = formContainer.querySelector('#age-filter');
+        if (ageInput) ageInput.value = '';
+        const breedInput = formContainer.querySelector('#breed-filter');
+        if (breedInput) breedInput.value = '';
+        const colorInput = formContainer.querySelector('#color-filter');
+        if (colorInput) colorInput.value = '';
+        const citySelect = formContainer.querySelector('#city-filter');
+        if (citySelect) citySelect.value = '';
+        const anyNeuteredRadio = formContainer.querySelector('input[name="neutered-filter"][value=""]');
+        if (anyNeuteredRadio) anyNeuteredRadio.checked = true;
+        const anyVaccinatedRadio = formContainer.querySelector('input[name="vaccinated-filter"][value=""]');
+        if (anyVaccinatedRadio) anyVaccinatedRadio.checked = true;
+        const anySizeRadio = formContainer.querySelector('input[name="size-filter"][value=""]');
+        if (anySizeRadio) anySizeRadio.checked = true;
+        const allKeywordButtons = formContainer.querySelectorAll('.keyword-tag-button');
+        allKeywordButtons.forEach(button => button.classList.remove('active'));
     }
-    const genderRadio = formContainer.querySelector('input[name="gender-filter"][value=""]');
-    if (genderRadio) genderRadio.checked = true;
-    const ageInput = formContainer.querySelector('#age-filter');
-    if (ageInput) ageInput.value = '';
-    const breedInput = formContainer.querySelector('#breed-filter');
-    if (breedInput) breedInput.value = '';
-    const colorInput = formContainer.querySelector('#color-filter');
-    if (colorInput) colorInput.value = '';
-    const citySelect = formContainer.querySelector('#city-filter');
-    if (citySelect) citySelect.value = '';
-    const anyNeuteredRadio = formContainer.querySelector('input[name="neutered-filter"][value=""]');
-    if (anyNeuteredRadio) anyNeuteredRadio.checked = true;
-    const anyVaccinatedRadio = formContainer.querySelector('input[name="vaccinated-filter"][value=""]');
-    if (anyVaccinatedRadio) anyVaccinatedRadio.checked = true;
-    const anySizeRadio = formContainer.querySelector('input[name="size-filter"][value=""]');
-    if (anySizeRadio) anySizeRadio.checked = true;
-    const allKeywordButtons = formContainer.querySelectorAll('.keyword-tag-button');
-    allKeywordButtons.forEach(button => button.classList.remove('active'));
-}
 
 
 
@@ -987,6 +1002,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Фаза 3: Назначение Обработчиков Событий ---
+    // Сначала проверяем, является ли это контекстом Mini App для вызова tg.expand()
+    if (tg && tg.initData && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        console.log("Обнаружен контекст Telegram Mini App. Выполняем tg.expand().");
+        tg.expand();
+        // Обновление приветствия для MiniApp, если пользователь не вошел через сайт
+        if (!isAuthenticated && userGreetingElement && tg.initDataUnsafe.user.first_name) {
+             userGreetingElement.textContent = `Привет, ${tg.initDataUnsafe.user.first_name}! (MiniApp)`;
+             // userGreetingElement.style.display = 'block'; // Управляется updateWebsiteLoginState
+        }
+    }
+
+    // Логика сплеш-скрина
+    if (splashScreen && !splashScreen.classList.contains('hidden')) {
+        console.log("Показываем сплеш-скрин...");
+        setTimeout(() => {
+            splashScreen.classList.add('hidden');
+            console.log("Сплеш-скрин скрыт.");
+            if (isAuthenticated) { // Если аутентифицированы через сайт
+                console.log("Пользователь уже аутентифицирован (веб-сайт). Загружаем избранное.");
+                fetchFavoriteIds(); // Загружаем данные, если пользователь уже вошел
+                showScreen('role-selection-screen');
+            } else if (tg && tg.initData) { // Если это Mini App И НЕ аутентифицированы через сайт
+                console.log("Пользователь не аутентифицирован (веб-сайт). Выполняем performAuthentication() для MiniApp/Test.");
+                performAuthentication(); // Ваша оригинальная функция
+            } else { // Обычный сайт, не аутентифицирован (виджет входа должен быть уже показан)
+                console.log("Обычный сайт, пользователь не аутентифицирован. Кнопка входа Telegram должна быть видна.");
+                showScreen('role-selection-screen');
+            }
+        }, 2000);
+    } else { // Если сплеш-скрина нет
+        console.log("Сплеш-скрин не активен.");
+        if (isAuthenticated) {
+            console.log("Пользователь уже аутентифицирован (веб-сайт). Загружаем избранное.");
+            fetchFavoriteIds();
+            showScreen('role-selection-screen');
+        } else if (tg && tg.initData) {
+            console.log("Пользователь не аутентифицирован (веб-сайт). Выполняем performAuthentication() для MiniApp/Test.");
+            performAuthentication();
+        } else {
+            console.log("Обычный сайт, пользователь не аутентифицирован. Кнопка входа Telegram должна быть видна.");
+            showScreen('role-selection-screen');
+        }
+    }
+
+    // МИНИМАЛЬНАЯ ПРАВКА 4: Добавляем обработчик для кнопки выхода
+    if (logoutButton) { // logoutButton объявлен выше
+        logoutButton.addEventListener('click', websiteLogout);
+    }
 
     // --- Обработчики кнопок выбора роли ---
     if (findPetButton) findPetButton.addEventListener('click', () => { userRole = 'find'; showScreen('animal-type-selection-find-screen'); });
@@ -1657,25 +1720,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Фаза 4: Начальные Действия ---
     // Приветствие пользователя
-    const initDataUnsafe = tg.initDataUnsafe || {};
-    const userDataUnsafe = initDataUnsafe.user;
-    if (userDataUnsafe && userDataUnsafe.first_name && userGreetingElement) {
-        userGreetingElement.textContent = `Привет, ${userDataUnsafe.first_name}!`;
-    }
-    console.log("Telegram Init Data (Unsafe для приветствия):", initDataUnsafe);
-
-    // Логика инициализации и сплеш-скрина
-    if (splashScreen && !splashScreen.classList.contains('hidden')) {
-        console.log("Показываем сплеш-скрин...");
-        setTimeout(() => {
-            console.log("Сплеш-скрин скрыт, выполняем аутентификацию...");
-            splashScreen.classList.add('hidden');
-            performAuthentication(); // Глобальная
-        }, 2000); // Задержка сплеш-скрина
-    } else {
-        console.log("Сплеш-скрин не найден/скрыт, выполняем аутентификацию...");
-        performAuthentication(); // Глобальная
-    }
+//    const initDataUnsafe = tg.initDataUnsafe || {};
+//    const userDataUnsafe = initDataUnsafe.user;
+//    if (userDataUnsafe && userDataUnsafe.first_name && userGreetingElement) {
+//        userGreetingElement.textContent = `Привет, ${userDataUnsafe.first_name}!`;
+//    }
+//    console.log("Telegram Init Data (Unsafe для приветствия):", initDataUnsafe);
+//
+//    // Логика инициализации и сплеш-скрина
+//    if (splashScreen && !splashScreen.classList.contains('hidden')) {
+//        console.log("Показываем сплеш-скрин...");
+//        setTimeout(() => {
+//            console.log("Сплеш-скрин скрыт, выполняем аутентификацию...");
+//            splashScreen.classList.add('hidden');
+//            performAuthentication(); // Глобальная
+//        }, 2000); // Задержка сплеш-скрина
+//    } else {
+//        console.log("Сплеш-скрин не найден/скрыт, выполняем аутентификацию...");
+//        performAuthentication(); // Глобальная
+//    }
 
     // --- Обработчик переключения вида на экране "Избранное" ---
     if (viewToggleButton && favoritesList) {
@@ -1746,6 +1809,152 @@ document.addEventListener('DOMContentLoaded', () => {
 //    }
 //}
 
+// === НОВЫЕ ФУНКЦИИ ДЛЯ АВТОРИЗАЦИИ ЧЕРЕЗ TELEGRAM WEBSITE LOGIN ===
+
+/**
+ * Обрабатывает данные авторизации, полученные из URL-фрагмента после редиректа с бэкенда.
+ */
+function handleWebsiteTelegramAuthCallback() {
+    if (window.location.hash && window.location.hash.startsWith('#telegram_auth=')) {
+        try {
+            const encodedData = window.location.hash.substring('#telegram_auth='.length);
+            const jsonData = atob(encodedData); // Декодируем из Base64
+            const authData = JSON.parse(jsonData);
+
+            if (authData.access_token) {
+                localStorage.setItem('api_access_token', authData.access_token);
+                localStorage.setItem('user_tg_id', authData.user_id);
+                localStorage.setItem('user_tg_firstName', authData.first_name || 'Пользователь');
+                localStorage.setItem('user_tg_username', authData.username || '');
+
+                authToken = authData.access_token; // Обновляем глобальный токен
+                isAuthenticated = true;             // Обновляем состояние
+
+                console.log('Успешная авторизация через Telegram (сайт):', authData);
+                // Вызываем обновление UI немедленно, так как состояние изменилось
+                updateWebsiteLoginState();
+
+                // Дополнительно можно вызвать функции, которые должны выполняться после логина
+                fetchFavoriteIds();
+
+            } else if (authData.error) {
+                console.error('Ошибка авторизации от бэкенда (сайт):', authData.error);
+                alert('Ошибка авторизации: ' + authData.error);
+            }
+        } catch (e) {
+            console.error('Ошибка обработки данных авторизации из URL (сайт):', e);
+            alert('Ошибка обработки данных авторизации.');
+        }
+        // Очищаем хеш из URL, чтобы данные не оставались видимыми и не обрабатывались повторно
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+}
+
+/**
+ * Обновляет состояние UI (приветствие, кнопка входа/выхода)
+ * на основе наличия токена в localStorage.
+ * Также загружает виджет Telegram, если пользователь не авторизован.
+ */
+function updateWebsiteLoginState() {
+    const storedToken = localStorage.getItem('api_access_token');
+    const userName = localStorage.getItem('user_tg_firstName');
+
+    // Элементы управления UI для авторизации (должны быть в index.html)
+    const userGreetingElement = document.getElementById('user-greeting');
+    const telegramLoginContainer = document.getElementById('telegram-login-container');
+    const logoutButton = document.getElementById('logout-button');
+
+    if (storedToken) {
+        authToken = storedToken; // Убедимся, что глобальный токен актуален
+        isAuthenticated = true;
+
+        if (userGreetingElement) {
+            userGreetingElement.textContent = `Привет, ${userName || 'Пользователь'}!`;
+            userGreetingElement.style.display = 'block';
+        }
+        if (telegramLoginContainer) {
+            telegramLoginContainer.style.display = 'none'; // Скрыть контейнер виджета
+            telegramLoginContainer.innerHTML = ''; // Очистить, чтобы виджет не дублировался
+        }
+        if (logoutButton) {
+            logoutButton.style.display = 'block';
+        }
+        // Здесь можно добавить логику показа/скрытия других элементов, зависящих от авторизации
+        // например, кнопок "Мои объявления", "Избранное"
+        const myPetsBtn = document.getElementById('my-pets-nav-button');
+        const favsBtn = document.getElementById('favorites-nav-button');
+        if (myPetsBtn) myPetsBtn.style.display = 'block'; // или как у вас настроено
+        if (favsBtn) favsBtn.style.display = 'block';
+
+
+    } else {
+        authToken = null;
+        isAuthenticated = false;
+
+        if (userGreetingElement) {
+            userGreetingElement.style.display = 'none';
+        }
+        if (telegramLoginContainer) {
+            telegramLoginContainer.style.display = 'block'; // Показать контейнер для виджета
+            loadTelegramLoginWidgetScript(); // Загрузить виджет
+        }
+        if (logoutButton) {
+            logoutButton.style.display = 'none';
+        }
+        // Скрыть кнопки, требующие авторизации
+        const myPetsBtn = document.getElementById('my-pets-nav-button');
+        const favsBtn = document.getElementById('favorites-nav-button');
+        if (myPetsBtn) myPetsBtn.style.display = 'none';
+        if (favsBtn) favsBtn.style.display = 'none';
+    }
+}
+
+/**
+ * Динамически загружает скрипт Telegram Login Widget.
+ */
+function loadTelegramLoginWidgetScript() {
+    const telegramLoginContainer = document.getElementById('telegram-login-container');
+    if (!telegramLoginContainer || document.getElementById('telegram-login-script-website')) {
+        // Если контейнера нет или скрипт уже добавлен, ничего не делаем
+        if (!telegramLoginContainer) console.error("Контейнер #telegram-login-container не найден для виджета.");
+        return;
+    }
+
+    // Очищаем контейнер перед добавлением нового виджета, на случай повторных вызовов
+    telegramLoginContainer.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.id = 'telegram-login-script-website'; // Уникальный ID для этого скрипта
+    script.async = true;
+    script.src = 'https://telegram.org/js/telegram-widget.js?22'; // Убедитесь, что версия актуальна
+    script.setAttribute('data-telegram-login', TELEGRAM_BOT_USERNAME);
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-auth-url', TELEGRAM_AUTH_CALLBACK_URL);
+    script.setAttribute('data-request-access', 'write');
+
+    telegramLoginContainer.appendChild(script);
+    console.log("Скрипт Telegram Login Widget добавлен для сайта.");
+}
+
+/**
+ * Осуществляет выход пользователя из системы (для веб-сайта).
+ */
+function websiteLogout() {
+    localStorage.removeItem('api_access_token');
+    localStorage.removeItem('user_tg_id');
+    localStorage.removeItem('user_tg_firstName');
+    localStorage.removeItem('user_tg_username');
+
+    authToken = null;
+    isAuthenticated = false;
+    favoriteAnnouncementIds.clear(); // Очищаем избранное при выходе
+
+    alert('Вы вышли из системы.');
+    updateWebsiteLoginState(); // Обновить UI до состояния "не залогинен"
+    showScreen('role-selection-screen'); // Показать главный экран или экран входа
+}
+
+// === КОНЕЦ НОВЫХ ФУНКЦИЙ ===
 
 // Условный экспорт для Jest-тестов
 if (typeof module !== 'undefined' && module.exports) {
