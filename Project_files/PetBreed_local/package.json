@@ -5,7 +5,8 @@
   "main": "script.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint . --ext .js --cache"
+    "lint": "eslint . --ext .js --cache",
+    "build": "echo 'Starting build...' && rm -rf dist && mkdir dist && cp index.html style.css script.js mock_data.json dist/ && cp -R images dist/images && cp -R icon dist/icon && echo 'Build finished.'"
   },
   "keywords": [],
   "author": "",
