@@ -6,7 +6,8 @@
 const BACKEND_BASE_URL = 'http://127.0.0.1:8000';
 let authToken = null;
 let isAuthenticated = false;
-//let userRole = null;
+// eslint-disable-next-line no-unused-vars
+let userRole = null;
 let animalType = null;
 let currentFilters = {};
 let currentSort = 'newest';
