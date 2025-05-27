@@ -1,8 +1,9 @@
 // --- script.js ---
 
 // --- Глобальные переменные состояния и для API ---
-const BACKEND_BASE_URL = 'https://feb5-67-220-95-210.ngrok-free.app'; 
-
+//const BACKEND_BASE_URL = 'https://i-love-pets.ru/'; // <-- УСТАНОВИТЕ ПРАВИЛЬНЫЙ URL ДЛЯ ТЕСТА
+//const BACKEND_BASE_URL = ''; // <-- Для продакшена на том же домене
+const BACKEND_BASE_URL = 'http://127.0.0.1:8000';
 let authToken = null;
 let isAuthenticated = false;
 let userRole = null;
@@ -94,7 +95,6 @@ async function fetchWithAuth(url, options = {}) {
     }
 }
 
-// --- Функция для загрузки ID избранных объявлений ---
 async function fetchFavoriteIds() {
     if (!isAuthenticated || !authToken) {
         console.log("Пользователь не аутентифицирован, ID избранных не загружены.");
@@ -118,7 +118,6 @@ async function fetchFavoriteIds() {
     }
 }
 
-// --- Обработчик кнопки лайка (с API) ---
 async function handleFavoriteClick(event) {
     const button = event.currentTarget;
     const announcementId = button.dataset.petId;
@@ -142,14 +141,10 @@ async function handleFavoriteClick(event) {
         const response = await fetchWithAuth(apiUrl, { method: method });
 
         if ((method === 'POST' && response.ok) || (method === 'DELETE' && response.status === 204)) {
-            // Определяем новое состояние
             const nowFavorite = !isCurrentlyFavorite;
 
-            // --- НАЧАЛО ИЗМЕНЕНИЙ ---
-            // 1. Находим ЕДИНСТВЕННУЮ иконку внутри кнопки
             const iconImage = button.querySelector('.favorite-icon');
 
-            // 2. Меняем ее src и alt в зависимости от нового состояния
             if (iconImage) {
                 iconImage.src = nowFavorite ? 'icon/heart-filled.svg' : 'icon/heart-icon.svg';
                 iconImage.alt = nowFavorite ? 'В избранном' : 'В избранное';
@@ -158,14 +153,12 @@ async function handleFavoriteClick(event) {
                 console.warn("Не найдена иконка .favorite-icon внутри кнопки для обновления src.");
             }
 
-            // 3. (Опционально) Обновляем класс is-favorite на самой кнопке, если он нужен для стилей
             button.classList.toggle('is-favorite', nowFavorite);
             console.log(`Успех: ${isCurrentlyFavorite ? 'удалено из' : 'добавлено в'} избранное (ID: ${announcementId})`);
 
-            // Обновляем наш глобальный Set с ID избранных
-            if (isCurrentlyFavorite) { // Если БЫЛО избранным (значит, удалили)
+            if (isCurrentlyFavorite) {
                 favoriteAnnouncementIds.delete(annIdInt);
-            } else { // Если НЕ БЫЛО избранным (значит, добавили)
+            } else {
                 favoriteAnnouncementIds.add(annIdInt);
             }
             console.log("Обновленный Set ID избранных:", favoriteAnnouncementIds);
@@ -198,9 +191,13 @@ async function handleFavoriteClick(event) {
 
 // --- Функция аутентификации через Telegram ---
 async function performAuthentication() {
-    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
-        console.warn("Локальный режим: Пропуск аутентификации Telegram, установка тестового токена.");
-        const MOCK_AUTH_TOKEN = ""; // User ID 1
+    const urlParams = new URLSearchParams(window.location.search);
+    const testMode = urlParams.get('test_mode');
+
+    if (testMode === 'true' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        console.warn("ТЕСТОВЫЙ РЕЖИМ (или локальный): Пропуск аутентификации Telegram, установка тестового токена.");
+        // --- Генерация токена для теста https://i-love-pets.ru/auth/generate_test_token/3
+        const MOCK_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzQ3NjUzMzAxfQ.RGd-JZlWXtrhvP_VBTBc3w4Eqg5pjMTOlCr1i_Fsf3Y"; // User ID 3
         if (!MOCK_AUTH_TOKEN) {
              console.error("Тестовый токен НЕ установлен!"); alert("Ошибка конфигурации: Тестовый токен не настроен.");
              isAuthenticated = false; showScreen('role-selection-screen'); return;
@@ -1034,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      console.error("Сетевая ошибка или другая проблема при запросе на контакт:", error);
                      alert(`Произошла ошибка сети при отправке запроса: ${error.message}`);
                  } finally {
-                     button.disabled = false; button.textContent = 'Связаться с владельцем';
+                     button.disabled = false; button.textContent = 'Связаться';
                  }
              }
          });
@@ -1761,3 +1758,13 @@ function handleAdFormFileSelect(event) {
 }
 
 
+// Условный экспорт для Jest-тестов
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    showScreen,
+    openMenu,
+    closeMenu,
+    toggleMenu,
+
+  };
+}
