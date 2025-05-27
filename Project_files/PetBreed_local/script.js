@@ -10,10 +10,10 @@ let userRole = null;
 let animalType = null;
 let currentFilters = {};
 let currentSort = 'newest';
-let loadedAnnouncements = [];
+//let loadedAnnouncements = [];
 let isDataLoading = false;
 let isCityFilterPopulated = false;
-const MOCK_CURRENT_USER_ID = 1;
+//const MOCK_CURRENT_USER_ID = 1;
 let selectedBreedFiles = { front: null, side: null, top: null };
 let currentlyOpenMenu = null;
 let favoriteAnnouncementIds = new Set();
@@ -177,7 +177,7 @@ async function handleFavoriteClick(_e) {
             }
         } else {
             let errorDetail = `Ошибка ${response.status}`;
-            try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) { /* ignore */ }
+            try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) { /* ignore */ }
             console.error(`Не удалось ${isCurrentlyFavorite ? 'удалить из' : 'добавить в'} избранное: ${errorDetail}`);
             alert(`Не удалось обновить избранное: ${errorDetail}`);
         }
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Основные элементы интерфейса
     const splashScreen = document.getElementById('splash-screen');
     const mainMenu = document.getElementById('main-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
+    //const menuOverlay = document.getElementById('menu-overlay');
     const userGreetingElement = document.getElementById('user-greeting');
 
     // Элементы экрана выбора роли
@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'pet-card';
         const pet = announcementData.pet || {};
-        const user = announcementData.user || {};
+        //const user = announcementData.user || {};
         const city = announcementData.city || 'Город не указан';
         const petName = pet.name || 'Имя не указано';
         const petBreed = pet.breed || 'Порода не указана';
@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchWithAuth(apiUrl); // Глобальная
             if (!response.ok) {
                 let errorDetail = `Статус ошибки: ${response.status}`;
-                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) {}
+                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) {}
                 throw new Error(errorDetail);
             }
             const announcementsFromApi = await response.json();
@@ -551,13 +551,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Получено ${announcementsFromApi.length} объявлений с API.`);
                 announcementsFromApi.forEach(ann => {
                     try { resultsListContainer.appendChild(createListPetCardElement(ann)); } // Локальная
-                    catch(e) { console.error("Ошибка при создании карточки для объявления:", ann, e); }
+                    catch(_e) { console.error("Ошибка при создании карточки для объявления:", ann, e); }
                 });
                 if (!isCityFilterPopulated) { // Заполнение фильтра городов один раз
                     try {
                         const uniqueCities = getUniqueCities(announcementsFromApi); // Локальная
                         if (uniqueCities.length > 0) populateCityFilter(uniqueCities); // Локальная
-                    } catch (e) { console.error("Ошибка при заполнении фильтра городов из данных API:", e); }
+                    } catch (_e) { console.error("Ошибка при заполнении фильтра городов из данных API:", e); }
                 }
             } else {
                 console.log("С API не получено ни одного объявления по текущим фильтрам.");
@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchWithAuth(apiUrl); // Глобальная
             if (!response.ok) {
                 let errorDetail = `Статус ошибки: ${response.status}`;
-                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) { }
+                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) { }
                 throw new Error(errorDetail);
             }
             const favoriteAnnouncements = await response.json();
@@ -594,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 favoriteAnnouncements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Сортировка по дате
                 favoriteAnnouncements.forEach(ann => {
                     try { favoritesListContainer.appendChild(createListPetCardElement(ann, { isFavoritesScreen: true })); } // Локальная
-                    catch (e) { console.error("Ошибка при создании карточки избранного для объявления:", ann, e); }
+                    catch (_e) { console.error("Ошибка при создании карточки избранного для объявления:", ann, e); }
                 });
             } else {
                 console.log("С API не получено ни одного избранного объявления.");
@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchWithAuth('/users/me/announcements'); // Глобальная
             if (!response.ok) {
                 let errorDetail = `Статус ошибки: ${response.status}`;
-                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) {}
+                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) {}
                 throw new Error(errorDetail);
             }
             const myAnnouncements = await response.json();
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Получено ${myAnnouncements.length} моих объявлений с API.`);
                 myAnnouncements.forEach(ann => {
                     try { myPetsListContainer.appendChild(createMyPetCardElement(ann)); } // Локальная
-                    catch(e) { console.error("Ошибка при создании карточки 'моего' объявления:", ann, e); }
+                    catch(_e) { console.error("Ошибка при создании карточки 'моего' объявления:", ann, e); }
                 });
             } else {
                 console.log("С API не получено ни одного 'моего' объявления.");
@@ -798,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchWithAuth(`/announcements/${announcementId}`); // Глобальная
             if (!response.ok) {
                 let errorDetail = `Статус ошибки: ${response.status}`;
-                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) {}
+                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) {}
                 throw new Error(`Ошибка загрузки данных: ${errorDetail}`);
             }
             const data = await response.json();
@@ -933,7 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 let errorDetail = `Ошибка удаления: Статус ${response.status}`;
                 try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; }
-                catch (e) { console.warn("Не удалось получить тело ошибки при удалении, используется статус."); }
+                catch (_e) { console.warn("Не удалось получить тело ошибки при удалении, используется статус."); }
                 throw new Error(`${errorDetail} (Объявление ID: ${announcementId})`);
             }
         } catch (error) {
@@ -1038,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          console.log("Запрос на контакт успешно отправлен.");
                      } else {
                          let errorDetail = `Ошибка ${response.status}`;
-                         try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) { }
+                         try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) { }
                          console.error(`Ошибка при отправке запроса на контакт: ${errorDetail}`);
                          alert(`Не удалось отправить запрос: ${errorDetail}`);
                      }
@@ -1083,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
         previewElement.style.backgroundImage = 'none';
         label.classList.remove('has-file');
 
-        if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
+        if (angle && Object.prototype.hasOwnProperty.call(selectedBreedFiles, angle)) {
             selectedBreedFiles[angle] = null;
         }
 
@@ -1092,14 +1092,14 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = (e) => {
                 previewElement.style.backgroundImage = `url('${e.target.result}')`;
                 label.classList.add('has-file');
-                if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
+                if (angle && Object.prototype.hasOwnProperty.call(selectedBreedFiles, angle)) {
                     selectedBreedFiles[angle] = file;
                     console.log('Обновлен selectedBreedFiles:', selectedBreedFiles);
                 }
             };
             reader.onerror = () => { // Исправлено: убрали параметр e
                 console.error("Ошибка чтения файла для превью.");
-                if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
+                if (angle && Object.prototype.hasOwnProperty.call(selectedBreedFiles, angle)) {
                     selectedBreedFiles[angle] = null;
                 }
             };
@@ -1317,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      loadAndRenderMyPets(); // Локальная
                  } else {
                      let errorDetail = `Ошибка сервера: ${response.status}`;
-                     try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) {}
+                     try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) {}
                      console.error(`Ошибка при ${formMode === 'edit' ? 'редактировании' : 'создании'} объявления:`, errorDetail);
                      alert(`Не удалось ${formMode === 'edit' ? 'сохранить изменения' : 'создать объявление'}: ${errorDetail}`);
                  }
@@ -1408,7 +1408,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      if (matchingAnnouncements && matchingAnnouncements.length > 0) {
                          matchingAnnouncements.forEach(ann => {
                              try { resultsContainer.appendChild(createListPetCardElement(ann)); } // Локальная
-                             catch (e) { console.error("Ошибка при создании карточки найденной пары:", ann, e); }
+                             catch (_e) { console.error("Ошибка при создании карточки найденной пары:", ann, e); }
                          });
                      } else {
                          resultsContainer.innerHTML = '<p>Подходящих пар не найдено.</p>';
@@ -1416,7 +1416,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      showScreen('results-screen'); // Глобальная
                  } else {
                      let errorDetail = `Ошибка сервера: ${response.status}`;
-                     try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (e) {}
+                     try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) {}
                      console.error("Ошибка при поиске пары:", errorDetail);
                      alert(`Не удалось найти пару: ${errorDetail}`);
                  }
@@ -1634,7 +1634,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      } else {
                           // ---> КОНЕЦ ДОБАВЛЕНИЯ <---
                           let errorMsg = `Ошибка сервера ${response.status}: ${response.statusText}`;
-                          try { const errorData = await response.json(); errorMsg = errorData.detail || errorMsg; } catch (e) {}
+                          try { const errorData = await response.json(); errorMsg = errorData.detail || errorMsg; } catch (_e) {}
                           breedResultOutputMulti.innerHTML = `<p style="color: red;">${errorMsg}</p>`;
                      }
                 }
