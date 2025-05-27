@@ -1,0 +1,15 @@
+{
+  "name": "petpreed",
+  "version": "1.0.0",
+  "description": "**PetPreed** — это платформа для поиска и пристройства домашних животных, реализованная в виде Telegram-бота и веб-приложения. Проект предоставляет удобный API на основе FastAPI (Python) с функциями классификации изображений, управления объявлениями и аутентификации через Telegram.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.27.0"
+  }
+}

@@ -1,0 +1,66 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Запускать при push в ветку main
+    paths: # Добавим paths, чтобы воркфлоу запускался только при изменениях в папке фронтенда
+      - 'Project_files/PetBreed_local/**'
+      - '.github/workflows/deploy.yml' # Или если сам воркфлоу меняется
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    # Указываем рабочую директорию по умолчанию для всех шагов этого job
+    defaults:
+      run:
+        working-directory: ./Project_files/PetBreed_local
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # working-directory для checkout не нужен, он чекаутит весь репозиторий
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: Project_files/PetBreed_local/package-lock.json # Уточняем путь к lock-файлу для кэша
+
+      - name: Install dependencies
+        # working-directory: ./Project_files/PetBreed_local # Уже задано в defaults
+        run: npm ci
+
+      - name: Lint code
+        # working-directory: ./Project_files/PetBreed_local
+        run: npm run lint
+
+      - name: Run tests
+        # working-directory: ./Project_files/PetBreed_local
+        run: npm run test
+
+      - name: Build project
+        # working-directory: ./Project_files/PetBreed_local
+        run: npm run build # Скрипт build должен создавать папку dist внутри PetBreed_local
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Путь к папке, которую нужно задеплоить, относительно корня репозитория
+          path: ./Project_files/PetBreed_local/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
