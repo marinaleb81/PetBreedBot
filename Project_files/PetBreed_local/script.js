@@ -11,7 +11,7 @@ let animalType = null;
 let currentFilters = {};
 let currentSort = 'newest';
 //let loadedAnnouncements = [];
-let isDataLoading = false;
+let // isDataLoading = false;
 let isCityFilterPopulated = false;
 //const MOCK_CURRENT_USER_ID = 1;
 let selectedBreedFiles = { front: null, side: null, top: null };
@@ -512,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Загрузка/Рендеринг РЕЗУЛЬТАТОВ с API для: Тип=${animalType} (${animalTypeRussian}), Фильтры=`, currentFilters, `Сортировка=${currentSort}`);
         if (!resultsListContainer) { console.error("Контейнер #results-list не найден!"); return; }
         resultsListContainer.innerHTML = '<p>Загрузка питомцев...</p>';
-        isDataLoading = true;
+        // isDataLoading = true;
         try {
             const params = new URLSearchParams();
             params.set('animal_type', animalTypeRussian);
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Ошибка при загрузке или отображении объявлений:", error);
             resultsListContainer.innerHTML = `<p>Не удалось загрузить питомцев. Ошибка: ${error.message || 'Неизвестная ошибка'}</p>`;
         } finally {
-            isDataLoading = false;
+            // isDataLoading = false;
             console.log("Загрузка и рендеринг результатов завершены.");
         }
     }
@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const favoritesListContainer = document.getElementById('favorites-list'); // Используем другой ID
         if (!favoritesListContainer) { console.error("Контейнер #favorites-list не найден!"); return; }
         favoritesListContainer.innerHTML = '<p>Загрузка избранного...</p>';
-        isDataLoading = true;
+        // isDataLoading = true;
         try {
             const apiUrl = '/users/me/favorites';
             console.log("Вызов fetchWithAuth для", apiUrl);
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Ошибка при загрузке или отображении избранного:", error);
             favoritesListContainer.innerHTML = `<p>Не удалось загрузить избранное. Ошибка: ${error.message || 'Неизвестная ошибка'}</p>`;
         } finally {
-            isDataLoading = false;
+            // isDataLoading = false;
             console.log("Загрузка и рендеринг избранного завершены.");
         }
     }
