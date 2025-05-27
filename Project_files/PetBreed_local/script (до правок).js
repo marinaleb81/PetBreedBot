@@ -868,31 +868,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const previewElement = form.querySelector('#preview-front');
             const labelElement = form.querySelector('#upload-label-front');
 
-//            if (previewElement && labelElement) {
-//                if (data.image_path) {
-//                    const relativeImagePath = `/${data.image_path.replace(/\\/g, '/')}`;
-//                    //const fullImageUrl = `<span class="math-inline">\{BACKEND\_BASE\_URL\}</span>{relativeImagePath}`;
-//                    const fullImageUrl = `${BACKEND_BASE_URL}${relativeImagePath}`;
-//                    previewElement.style.backgroundImage = `url('${fullImageUrl}')`; // Устанавливаем фон
-//                    labelElement.classList.add('has-file'); // Показываем, что файл есть
-//                    console.log("Превью текущего изображения установлено:", fullImageUrl);
-//                } else {
-//                    previewElement.style.backgroundImage = 'none'; // Убираем фон
-//                    labelElement.classList.remove('has-file'); // Показываем, что файла нет
-//                    console.log("Текущее изображение отсутствует, превью скрыто.");
-//                }
-//            }
-
             if (previewElement && labelElement) {
                 if (data.image_path) {
                     const relativeImagePath = `/${data.image_path.replace(/\\/g, '/')}`;
-                    const fullImageUrl = `${BACKEND_BASE_URL}${relativeImagePath}`;
-                    previewElement.style.backgroundImage = `url('${fullImageUrl}')`;
-                    labelElement.classList.add('has-file');
+                    const fullImageUrl = `<span class="math-inline">\{BACKEND\_BASE\_URL\}</span>{relativeImagePath}`;
+                    previewElement.style.backgroundImage = `url('${fullImageUrl}')`; // Устанавливаем фон
+                    labelElement.classList.add('has-file'); // Показываем, что файл есть
                     console.log("Превью текущего изображения установлено:", fullImageUrl);
                 } else {
-                    previewElement.style.backgroundImage = 'none';
-                    labelElement.classList.remove('has-file');
+                    previewElement.style.backgroundImage = 'none'; // Убираем фон
+                    labelElement.classList.remove('has-file'); // Показываем, что файла нет
                     console.log("Текущее изображение отсутствует, превью скрыто.");
                 }
             }
@@ -1069,22 +1054,34 @@ document.addEventListener('DOMContentLoaded', () => {
      * отображения превью И СОХРАНЕНИЯ ФАЙЛА в selectedBreedFiles.
      */
     function handleUniversalImagePreview(event) {
-        const imageInput = event.target;
+        const imageInput = event.target; // input, на котором произошло событие
         const file = imageInput.files[0];
+
+        // Находим элементы для превью и обертки (label)
         const label = imageInput.closest('.angle-upload-button');
         const previewElement = label ? label.querySelector('.angle-upload-preview') : null;
-        const angle = imageInput.dataset.angle;
+
+        // ---> ДОБАВЛЕНО: Получаем ракурс из data-атрибута <---
+        const angle = imageInput.dataset.angle; // Должен быть 'front', 'side' или 'top' для формы породы
 
         if (!label || !previewElement) {
             console.error("Не найдены элементы превью или label для", imageInput);
             return;
         }
+        // Добавим проверку на angle, если он нужен для сохранения файла
+        // (Для формы объявления он может быть не нужен, но лучше пусть будет)
+        // if (!angle) {
+        //     console.warn("Атрибут data-angle не найден на", imageInput);
+        // }
 
+        // Сначала сбрасываем состояние
         previewElement.style.backgroundImage = 'none';
         label.classList.remove('has-file');
 
+        // ---> ДОБАВЛЕНО: Сбрасываем файл в глобальной переменной при любом изменении <---
+        // Проверяем, что такой ключ вообще есть в объекте selectedBreedFiles
         if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
-            selectedBreedFiles[angle] = null;
+            selectedBreedFiles[angle] = null; // Сбрасываем перед попыткой чтения
         }
 
         if (file && file.type.startsWith('image/')) {
@@ -1092,22 +1089,27 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = (e) => {
                 previewElement.style.backgroundImage = `url('${e.target.result}')`;
                 label.classList.add('has-file');
+
+                // ---> ДОБАВЛЕНО: Сохраняем файл в глобальную переменную <---
                 if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
-                    selectedBreedFiles[angle] = file;
-                    console.log('Обновлен selectedBreedFiles:', selectedBreedFiles);
+                    selectedBreedFiles[angle] = file; // Сохраняем объект файла
+                    console.log('Обновлен selectedBreedFiles:', selectedBreedFiles); // Отладка
                 }
-            };
-            reader.onerror = () => { // Исправлено: убрали параметр e
+            }
+            reader.onerror = () => {
                 console.error("Ошибка чтения файла для превью.");
-                if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
+                // Убедимся, что файл сброшен и в selectedBreedFiles при ошибке чтения
+                 if (angle && selectedBreedFiles.hasOwnProperty(angle)) {
                     selectedBreedFiles[angle] = null;
                 }
-            };
+            }
             reader.readAsDataURL(file);
         } else if (file) {
             console.warn("Выбранный файл не является изображением:", file.type);
-            imageInput.value = '';
+            imageInput.value = ''; // Сбрасываем некорректный выбор
+            // Файл в selectedBreedFiles уже сброшен выше
         }
+        // Если файл не выбран, файл в selectedBreedFiles уже сброшен выше
     }
 
     function handleAnimalTypeSelectionFind(type) {
