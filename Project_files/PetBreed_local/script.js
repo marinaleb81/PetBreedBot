@@ -6,7 +6,7 @@
 const BACKEND_BASE_URL = 'http://127.0.0.1:8000';
 let authToken = null;
 let isAuthenticated = false;
-let userRole = null;
+//let userRole = null;
 let animalType = null;
 let currentFilters = {};
 let currentSort = 'newest';
@@ -947,42 +947,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Функция для обработки выбора файла для одного ракурса (ваш код)
-    const handleAngleFileSelect = (_e) => {
-        const input = event.target;
-        const angle = input.dataset.angle;
-        const file = input.files[0];
-        const label = angleLabels[angle]; // Используем объект angleLabels
-        const preview = anglePreviews[angle]; // Используем объект anglePreviews
-
-        console.log('Input:', input);
-        console.log('Angle (из data-angle):', angle);
-        console.log('Выбранный файл:', file);
-        console.log('Найденный Label:', label);
-        console.log('Найденный Preview:', preview);
-
-        if (file && angle && label && preview) {
-            selectedBreedFiles[angle] = file;
-            console.log(`Файл для ракурса '${angle}' выбран:`, file.name);
-            const reader = new FileReader();
-            reader.onload = (_e) => {
-                preview.style.backgroundImage = `url('${e.target.result}')`;
-                label.classList.add('has-file');
-            };
-            reader.onerror = (_e) => {
-                 console.error(`Ошибка чтения файла для превью (${angle}):`, _e);
-                 alert(`Не удалось прочитать файл для предпросмотра.`);
-                 selectedBreedFiles[angle] = null;
-                 preview.style.backgroundImage = 'none';
-                 label.classList.remove('has-file');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            console.log(`Выбор файла для ракурса '${angle}' отменен или элементы не найдены.`);
-            selectedBreedFiles[angle] = null;
-            if(preview) preview.style.backgroundImage = 'none';
-            if(label) label.classList.remove('has-file');
-        }
-    };
+//    const handleAngleFileSelect = (_e) => {
+//        const input = event.target;
+//        const angle = input.dataset.angle;
+//        const file = input.files[0];
+//        const label = angleLabels[angle]; // Используем объект angleLabels
+//        const preview = anglePreviews[angle]; // Используем объект anglePreviews
+//
+//        console.log('Input:', input);
+//        console.log('Angle (из data-angle):', angle);
+//        console.log('Выбранный файл:', file);
+//        console.log('Найденный Label:', label);
+//        console.log('Найденный Preview:', preview);
+//
+//        if (file && angle && label && preview) {
+//            selectedBreedFiles[angle] = file;
+//            console.log(`Файл для ракурса '${angle}' выбран:`, file.name);
+//            const reader = new FileReader();
+//            reader.onload = (_e) => {
+//                preview.style.backgroundImage = `url('${_e.target.result}')`;
+//                label.classList.add('has-file');
+//            };
+//            reader.onerror = (_e) => {
+//                 console.error(`Ошибка чтения файла для превью (${angle}):`, _e);
+//                 alert(`Не удалось прочитать файл для предпросмотра.`);
+//                 selectedBreedFiles[angle] = null;
+//                 preview.style.backgroundImage = 'none';
+//                 label.classList.remove('has-file');
+//            };
+//            reader.readAsDataURL(file);
+//        } else {
+//            console.log(`Выбор файла для ракурса '${angle}' отменен или элементы не найдены.`);
+//            selectedBreedFiles[angle] = null;
+//            if(preview) preview.style.backgroundImage = 'none';
+//            if(label) label.classList.remove('has-file');
+//        }
+//    };
 
 
     // --- Фаза 3: Назначение Обработчиков Событий ---
@@ -1338,63 +1338,95 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Обработчик формы "Найти пару" ---
     if (findMateSubmitButton && findMateFormContainer) {
-        findMateSubmitButton.addEventListener('click', async () => {
-            console.log("Нажата кнопка 'Найти пару'");
-            const photoInput = findMateFormContainer.querySelector('#image-input-find-mate');
-            const photoFile = photoInput?.files[0];
-            console.log("Файл из формы 'Найти пару':", photoFile);
-            const animalTypeSelected = findMateFormContainer.querySelector('input[name="find-mate-animal-type"]:checked');
-            const animalTypeValue = animalTypeSelected ? animalTypeSelected.value : null;
-            const genderSelected = findMateFormContainer.querySelector('input[name="find-mate-gender"]:checked');
-            const genderValue = genderSelected ? genderSelected.value : null;
-            const nicknameValue = findMateFormContainer.querySelector('#find-mate-nickname').value.trim();
-            const ageValue = findMateFormContainer.querySelector('#find-mate-age').value;
-            const breedValue = findMateFormContainer.querySelector('#find-mate-breed').value.trim();
-            const sizeSelected = findMateFormContainer.querySelector('input[name="find-mate-size"]:checked');
-            const sizeValue = (animalTypeValue === 'Собака' && sizeSelected) ? sizeSelected.value : null;
-            const cityValue = findMateFormContainer.querySelector('#find-mate-city').value.trim();
+         findMateSubmitButton.addEventListener('click', async () => {
+             console.log("Нажата кнопка 'Найти пару'");
 
-            let clientErrors = [];
-            if (!photoFile) {
-                clientErrors.push("Фотография обязательна");
-            }
-            if (!animalTypeValue) clientErrors.push("Тип животного");
-            if (!genderValue) clientErrors.push("Пол");
-            if (!ageValue || parseInt(ageValue) < 1) clientErrors.push("Возраст (минимум 1 год)");
-            if (!breedValue) clientErrors.push("Порода");
+             // Сбор данных
+             const photoInput = findMateFormContainer.querySelector('#image-input-find-mate'); // НОВЫЙ ID
+             const photoFile = photoInput?.files[0];
+             console.log("Файл из формы 'Найти пару':", photoFile); // Отладка
+             const animalTypeSelected = findMateFormContainer.querySelector('input[name="find-mate-animal-type"]:checked'); const animalTypeValue = animalTypeSelected ? animalTypeSelected.value : null;
+             const genderSelected = findMateFormContainer.querySelector('input[name="find-mate-gender"]:checked'); const genderValue = genderSelected ? genderSelected.value : null;
+             const nicknameValue = findMateFormContainer.querySelector('#find-mate-nickname').value.trim();
+             const ageValue = findMateFormContainer.querySelector('#find-mate-age').value;
+             const breedValue = findMateFormContainer.querySelector('#find-mate-breed').value.trim();
+             const sizeSelected = findMateFormContainer.querySelector('input[name="find-mate-size"]:checked'); const sizeValue = (animalTypeValue === 'Собака' && sizeSelected) ? sizeSelected.value : null;
+             const cityValue = findMateFormContainer.querySelector('#find-mate-city').value.trim();
+             // Доп. отметки и заметки пока не используются в запросе к /pets/find_mate
 
-            if (clientErrors.length > 0) {
-                alert("Пожалуйста, заполните обязательные поля: " + clientErrors.join(', '));
-                return;
-            }
+             // --- Валидация ---
+             let clientErrors = [];
+             // Проверка фото (теперь используем photoFile)
+             if (!photoFile) { // Фото обязательно для этой формы
+                  clientErrors.push("Фотография обязательна");
+             }
+             if (!animalTypeValue) clientErrors.push("Тип животного");
+             if (!genderValue) clientErrors.push("Пол");
+             if (!ageValue || parseInt(ageValue) < 1) clientErrors.push("Возраст (минимум 1 год)");
+             if (!breedValue) clientErrors.push("Порода");
 
-            findMateSubmitButton.disabled = true;
-            findMateSubmitButton.textContent = 'Поиск...';
+             if (clientErrors.length > 0) {
+                 alert("Пожалуйста, заполните обязательные поля: " + clientErrors.join(', '));
+                 return;
+             }
 
-            const formData = new FormData();
-            formData.append('image', photoFile, photoFile.name); // Оставляем только одно добавление
-            formData.append('animal_type', animalTypeValue);
-            formData.append('gender', genderValue);
-            formData.append('age', ageValue);
-            formData.append('breed', breedValue);
-            if (nicknameValue) formData.append('name', nicknameValue);
-            if (sizeValue) formData.append('size', sizeValue);
-            if (cityValue) formData.append('city', cityValue);
+             findMateSubmitButton.disabled = true; findMateSubmitButton.textContent = 'Поиск...';
 
-            const apiUrl = '/announcements/pets/find_mate';
-            try {
-                console.log(`Отправка FormData на ${apiUrl} (POST)`);
-                const response = await fetchWithAuth(apiUrl, { method: 'POST', body: formData });
-                // ... остальной код ...
-            } catch (error) {
-                console.error("Критическая ошибка при поиске пары:", error);
-                alert(`Произошла ошибка при отправке данных: ${error.message}`);
-            } finally {
-                findMateSubmitButton.disabled = false;
-                findMateSubmitButton.textContent = 'Найти пару';
-            }
-        });
-    }
+             // FormData
+             const formData = new FormData();
+             // Добавляем файл, ЕСЛИ он есть
+             if (photoFile) {
+                 formData.append('image', photoFile, photoFile.name); // Ключ 'image' или какой ожидает бэкенд для этой формы?
+             }
+             formData.append('image', photoFile, photoFile.name); // Фото обязательно
+             formData.append('animal_type', animalTypeValue);
+             formData.append('gender', genderValue);
+             formData.append('age', ageValue);
+             formData.append('breed', breedValue);
+             if (nicknameValue) formData.append('name', nicknameValue);
+             if (sizeValue) formData.append('size', sizeValue);
+             if (cityValue) formData.append('city', cityValue);
+             // Доп. отметки и заметки пока не отправляются
+
+             const apiUrl = '/announcements/pets/find_mate'; // Эндпоинт в announcements.py
+             try {
+                 console.log(`Отправка FormData на ${apiUrl} (POST)`);
+                 const response = await fetchWithAuth(apiUrl, { method: 'POST', body: formData }); // Глобальная
+
+                 if (response.ok) {
+                     const matchingAnnouncements = await response.json();
+                     console.log(`Найдено пар: ${matchingAnnouncements.length}`, matchingAnnouncements);
+                     const resultsContainer = document.getElementById('results-list'); // Используем существующий контейнер
+                     const resultsScreenTitle = document.querySelector('#results-screen h2');
+                     if (!resultsContainer || !resultsScreenTitle) {
+                         console.error("Не найден контейнер #results-list или заголовок H2 на экране результатов!");
+                         alert("Не удалось отобразить результаты."); return;
+                     }
+                     resultsContainer.innerHTML = ''; // Очистка
+                     resultsScreenTitle.textContent = 'Найденные пары'; // Меняем заголовок
+                     if (matchingAnnouncements && matchingAnnouncements.length > 0) {
+                         matchingAnnouncements.forEach(ann => {
+                             try { resultsContainer.appendChild(createListPetCardElement(ann)); } // Локальная
+                             catch (_e) { console.error("Ошибка при создании карточки найденной пары:", ann, _e); }
+                         });
+                     } else {
+                         resultsContainer.innerHTML = '<p>Подходящих пар не найдено.</p>';
+                     }
+                     showScreen('results-screen'); // Глобальная
+                 } else {
+                     let errorDetail = `Ошибка сервера: ${response.status}`;
+                     try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail; } catch (_e) {}
+                     console.error("Ошибка при поиске пары:", errorDetail);
+                     alert(`Не удалось найти пару: ${errorDetail}`);
+                 }
+             } catch (error) {
+                 console.error("Критическая ошибка при поиске пары:", error);
+                 alert(`Произошла ошибка при отправке данных: ${error.message}`);
+             } finally {
+                 findMateSubmitButton.disabled = false; findMateSubmitButton.textContent = 'Найти пару';
+             }
+         });
+     } else { console.warn("Кнопка 'Найти пару' (#find-mate-submit-button) или контейнер формы не найдены."); }
 
     // --- Обработчики меню на карточках "Мои объявления" (Делегирование) ---
      if (myPetsListContainer) {
@@ -1670,48 +1702,48 @@ document.addEventListener('DOMContentLoaded', () => {
 }); // --- Конец DOMContentLoaded ---
 
 // --- Функция для обработки выбора файла и показа превью (НОВАЯ или АДАПТИРОВАННАЯ) ---
-function handleAdFormFileSelect(event) {
-    const fileInput = event.target;
-    const file = fileInput.files[0];
-    const parentLabel = fileInput.closest('.angle-upload-button');
-    if (!parentLabel) {
-        console.error("Не найден родительский .angle-upload-button для превью");
-        return;
-    }
-    const previewElement = parentLabel.querySelector('.angle-upload-preview');
-    if (!previewElement) {
-        console.error("Не найден .angle-upload-preview внутри родительского элемента");
-        return;
-    }
-
-    if (file) {
-        if (!file.type.startsWith('image/')) {
-            alert('Пожалуйста, выберите файл изображения.', 'error');
-            fileInput.value = '';
-            previewElement.style.backgroundImage = 'none';
-            parentLabel.classList.remove('has-file');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(_e) {
-            previewElement.style.backgroundImage = `url('${_e.target.result}')`;
-            parentLabel.classList.add('has-file');
-            console.log('Превью для формы объявления установлено.');
-        };
-        reader.onerror = function(_e) {
-            console.error("Ошибка чтения файла:", _e);
-            alert('Не удалось прочитать файл для превью.', 'error');
-            previewElement.style.backgroundImage = 'none';
-            parentLabel.classList.remove('has-file');
-        };
-        reader.readAsDataURL(file);
-    } else {
-        previewElement.style.backgroundImage = 'none';
-        parentLabel.classList.remove('has-file');
-        console.log('Выбор файла отменен, превью сброшено.');
-    }
-}
+//function handleAdFormFileSelect(event) {
+//    const fileInput = event.target;
+//    const file = fileInput.files[0];
+//    const parentLabel = fileInput.closest('.angle-upload-button');
+//    if (!parentLabel) {
+//        console.error("Не найден родительский .angle-upload-button для превью");
+//        return;
+//    }
+//    const previewElement = parentLabel.querySelector('.angle-upload-preview');
+//    if (!previewElement) {
+//        console.error("Не найден .angle-upload-preview внутри родительского элемента");
+//        return;
+//    }
+//
+//    if (file) {
+//        if (!file.type.startsWith('image/')) {
+//            alert('Пожалуйста, выберите файл изображения.', 'error');
+//            fileInput.value = '';
+//            previewElement.style.backgroundImage = 'none';
+//            parentLabel.classList.remove('has-file');
+//            return;
+//        }
+//
+//        const reader = new FileReader();
+//        reader.onload = function(_e) {
+//            previewElement.style.backgroundImage = `url('${_e.target.result}')`;
+//            parentLabel.classList.add('has-file');
+//            console.log('Превью для формы объявления установлено.');
+//        };
+//        reader.onerror = function(_e) {
+//            console.error("Ошибка чтения файла:", _e);
+//            alert('Не удалось прочитать файл для превью.', 'error');
+//            previewElement.style.backgroundImage = 'none';
+//            parentLabel.classList.remove('has-file');
+//        };
+//        reader.readAsDataURL(file);
+//    } else {
+//        previewElement.style.backgroundImage = 'none';
+//        parentLabel.classList.remove('has-file');
+//        console.log('Выбор файла отменен, превью сброшено.');
+//    }
+//}
 
 
 // Условный экспорт для Jest-тестов
