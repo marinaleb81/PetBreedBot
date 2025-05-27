@@ -1,62 +1,54 @@
 // eslint.config.mjs
 import globals from "globals";
 import pluginJs from "@eslint/js";
-// Если будешь использовать плагин для Jest, раскомментируй и установи:
-// import pluginJest from "eslint-plugin-jest";
+// import pluginJest from "eslint-plugin-jest"; // Если решишь использовать
 
 export default [
-  pluginJs.configs.recommended, // Добавляем базовые рекомендуемые правила ESLint
+  pluginJs.configs.recommended, // <-- ВАЖНО: Базовые рекомендуемые правила ESLint
+
+  // Общие правила для всех файлов можно оставить здесь, если они не конфликтуют с recommended
+  // или переопределить точечно ниже.
   {
-    // Глобальные настройки для всех JS файлов (можно оставить пустым, если все в pluginJs.configs.recommended)
-    // Но languageOptions и linterOptions лучше оставить для явности
-    languageOptions: {
-      ecmaVersion: 2021,
-      sourceType: "commonjs", // По умолчанию
-      globals: {
-        ...globals.browser,
-        // Telegram: "readonly", // Можно определить глобально, если используется везде
-      }
-    },
     linterOptions: {
       reportUnusedDisableDirectives: "warn"
     },
     rules: {
       "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "no-empty": ["error", { "allowEmptyCatch": true }],
-      // "no-prototype-builtins": "warn", // Лучше исправить код, как обсуждали
+      "no-prototype-builtins": "warn", // Лучше исправлять код, но можно "off" для начала
+      // Другие твои общие правила
     }
   },
+
   {
     // Настройки для основного скрипта script.js
     files: ["script.js"],
     languageOptions: {
-      sourceType: "commonjs", // У script.js есть module.exports в конце
+      sourceType: "commonjs", // Так как у тебя есть module.exports в конце
       globals: {
-        ...globals.browser,
-        Telegram: "readonly", // Для window.Telegram.WebApp
+        ...globals.browser,    // document, window, fetch, alert, etc.
+        Telegram: "readonly",   // Для window.Telegram.WebApp
       }
     },
     rules: {
-      // Сюда можно добавить правила, специфичные только для script.js
-       "no-undef": ["error", { "typeof": true }] // Чтобы typeof module не вызывал ошибку
+      // Если 'module' в script.js (в блоке exports) все еще не определяется,
+      // можно попробовать добавить 'node: true' в globals здесь,
+      // но sourceType: "commonjs" с pluginJs.configs.recommended должно помочь.
     }
   },
   {
     // Настройки для тестовых файлов
     files: ["test/**/*.test.js", "tests/**/*.test.js"],
+    // plugins: { // Если используешь eslint-plugin-jest
+    //   jest: pluginJest,
+    // },
     languageOptions: {
       globals: {
-        ...globals.jest, // describe, test, expect, jest, beforeEach и т.д.
-        ...globals.node, // Для require в тестах
+        ...globals.jest,     // describe, test, expect, jest, beforeEach и т.д.
+        ...globals.node,     // Для require, module (если вдруг понадобится в тестах)
       }
     },
-    // Если НЕ используешь плагин eslint-plugin-jest, можно временно оставить это:
-    // rules: {
-    //     "no-undef": "off" // Отключает no-undef ТОЛЬКО для тестов
-    // }
-    // Но лучше, чтобы globals.jest и globals.node сработали.
-    // Если после исправления конфига все еще будут ошибки no-undef в тестах,
-    // тогда можно вернуть rules: { "no-undef": "off" } сюда как временное решение.
+    // rules: pluginJest ? pluginJest.configs.recommended.rules : {}, // Если используешь eslint-plugin-jest
   },
   {
     // Настройки для конфигурационных файлов Node.js
@@ -64,7 +56,7 @@ export default [
     languageOptions: {
       sourceType: "commonjs",
       globals: {
-        ...globals.node, // module, exports, require, __dirname, process и т.д.
+        ...globals.node,       // module, exports, require, __dirname, process и т.д.
       }
     },
     rules: {
