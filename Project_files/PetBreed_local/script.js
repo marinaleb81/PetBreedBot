@@ -1723,7 +1723,7 @@ function handleAdFormFileSelect(event) {
     if (file) {
         // Проверка типа файла (опционально, но рекомендуется)
         if (!file.type.startsWith('image/')) {
-            showAlert('Пожалуйста, выберите файл изображения.', 'error');
+            alert('Пожалуйста, выберите файл изображения.', 'error');
             fileInput.value = ''; // Сбрасываем выбор файла
              previewElement.style.backgroundImage = 'none'; // Убираем фон
              parentLabel.classList.remove('has-file'); // Убираем класс
@@ -1741,7 +1741,7 @@ function handleAdFormFileSelect(event) {
         }
         reader.onerror = function(e) {
             console.error("Ошибка чтения файла:", e);
-            showAlert('Не удалось прочитать файл для превью.', 'error');
+            alert('Не удалось прочитать файл для превью.', 'error');
             previewElement.style.backgroundImage = 'none';
             parentLabel.classList.remove('has-file');
         }

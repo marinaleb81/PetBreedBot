@@ -1,20 +1,18 @@
 // eslint.config.mjs
 import globals from "globals";
-import eslintJs from "@eslint/js"; // Стандартный импорт
+import eslintJs from "@eslint/js";
 
 export default [
   // 1. Базовые рекомендуемые правила от ESLint для JavaScript.
-  // Этот конфиг по умолчанию использует sourceType: 'module' для .js и .mjs файлов,
-  // что правильно для самого eslint.config.mjs.
+  // Он по умолчанию правильно обработает .mjs как ES-модуль.
   eslintJs.configs.recommended,
 
-  // 2. Твои общие правила, которые будут применяться поверх рекомендованных.
-  // Они не должны менять sourceType глобально на "commonjs".
+  // 2. Общие настройки языка и твои кастомные правила
   {
     languageOptions: {
       ecmaVersion: 2021,
       globals: {
-        ...globals.browser, // Глобальные переменные браузера по умолчанию
+        ...globals.browser,
       }
     },
     linterOptions: {
@@ -27,18 +25,15 @@ export default [
     }
   },
 
-  // 3. Специфичные настройки для твоего основного файла script.js
+  // 3. Специфичные настройки для script.js
   {
     files: ["script.js"],
     languageOptions: {
-      sourceType: "commonjs", // Важно, так как у тебя есть module.exports в конце script.js
+      sourceType: "commonjs", // Для блока module.exports в script.js
       globals: {
-        // globals.browser УЖЕ НАСЛЕДУЮТСЯ из блока выше
-        Telegram: "readonly",   // Для window.Telegram.WebApp
-        // 'module' и 'exports' должны быть доступны благодаря sourceType: "commonjs"
-        // и globals.node, если бы он был применен здесь.
-        // Чтобы точно работало для `if (typeof module !== 'undefined' && module.exports)`:
-        module: "readonly",
+        // globals.browser УЖЕ НАСЛЕДУЮТСЯ
+        Telegram: "readonly",
+        module: "readonly", // Явно разрешаем module и exports
         exports: "readonly",
       }
     }
@@ -48,28 +43,26 @@ export default [
   {
     files: ["test/**/*.test.js", "tests/**/*.test.js"],
     languageOptions: {
-      sourceType: "commonjs", // Тестовые файлы используют require()
+      sourceType: "commonjs", // Тесты используют require()
       globals: {
-        ...globals.node,  // Определяет 'require', 'module' и др.
-        ...globals.jest,  // Определяет 'describe', 'test', 'expect' и т.д.
+        ...globals.node,
+        ...globals.jest,
       }
     }
   },
 
-  // 5. Специфичные настройки для jest.config.js (Node.js окружение)
+  // 5. Специфичные настройки для jest.config.js
   {
     files: ["jest.config.js"], // ТОЛЬКО для jest.config.js
     languageOptions: {
       sourceType: "commonjs",
       globals: {
-        ...globals.node, // Определяет 'module', 'exports', 'require' и т.д.
+        ...globals.node,
       }
     },
     rules: {
       "no-unused-vars": "off"
     }
   }
-  // Сам файл eslint.config.mjs (этот самый файл) теперь НЕ указан в блоке выше,
-  // и для него будет использоваться sourceType: 'module' из eslintJs.configs.recommended,
-  // что корректно для его синтаксиса с import/export.
+  // Сам eslint.config.mjs НЕ ДОЛЖЕН быть здесь с sourceType: "commonjs"
 ];
