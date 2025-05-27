@@ -118,7 +118,7 @@ async function fetchFavoriteIds() {
     }
 }
 
-async function handleFavoriteClick(event) {
+async function handleFavoriteClick(_e) {
     const button = event.currentTarget;
     const announcementId = button.dataset.petId;
     if (!announcementId) {
@@ -854,7 +854,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Обработчик кликов по тегам внутри ФОРМЫ ОБЪЯВЛЕНИЯ ---
             const adFormKeywordsContainer = document.querySelector('#ad-form-container #keywords-filter-tags');
             if (adFormKeywordsContainer) {
-                adFormKeywordsContainer.addEventListener('click', (event) => {
+                adFormKeywordsContainer.addEventListener('click', (_e) => {
                     if (event.target.classList.contains('keyword-tag-button')) {
                         event.target.classList.toggle('active'); // Переключаем класс active
                     }
@@ -947,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Функция для обработки выбора файла для одного ракурса (ваш код)
-    const handleAngleFileSelect = (event) => {
+    const handleAngleFileSelect = (_e) => {
         const input = event.target;
         const angle = input.dataset.angle;
         const file = input.files[0];
@@ -1021,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Обработчик для кнопки "Связаться" (Делегирование) ---
      if (resultsListContainer) { // Используем resultsListContainer, не resultsContainerForDelegation
-         resultsListContainer.addEventListener('click', async (event) => {
+         resultsListContainer.addEventListener('click', async (_e) => {
              if (event.target.classList.contains('contact-button')) {
                  const button = event.target;
                  const announcementId = button.dataset.announcementId;
@@ -1053,12 +1053,12 @@ document.addEventListener('DOMContentLoaded', () => {
      } else { console.warn("Контейнер #results-list не найден для делегирования событий кнопки 'Связаться'"); }
 
     // --- УНИВЕРСАЛЬНЫЙ ОБРАБОТЧИК ПРЕВЬЮ через делегирование ---
-    document.body.addEventListener('change', (event) => {
+    document.body.addEventListener('change', (_e) => {
         // Проверяем, что событие произошло на input[type=file]
         // И что этот input находится внутри элемента с классом 'angle-upload-button'
         if (event.target.type === 'file' && event.target.closest('.angle-upload-button')) {
             // Если да, вызываем нашу универсальную функцию
-            handleUniversalImagePreview(event);
+            handleUniversalImagePreview(_e);
         }
     });
     console.log("Универсальный обработчик превью изображений назначен через делегирование.");
@@ -1068,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Универсальная функция для обработки выбора файла изображения,
      * отображения превью И СОХРАНЕНИЯ ФАЙЛА в selectedBreedFiles.
      */
-    function handleUniversalImagePreview(event) {
+    function handleUniversalImagePreview(_e) {
         const imageInput = event.target;
         const file = imageInput.files[0];
         const label = imageInput.closest('.angle-upload-button');
@@ -1138,7 +1138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAndRenderFavorites(); // Локальная
     });
     if (sortButton && sortMenu) {
-        sortButton.addEventListener('click', (event) => {
+        sortButton.addEventListener('click', (_e) => {
             event.stopPropagation();
             console.log("Нажата кнопка сортировки!");
             if (sortMenu.classList.contains('hidden')) { // Обновляем активную опцию только при открытии
@@ -1151,7 +1151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     if (sortMenu) {
-        sortMenu.addEventListener('click', (event) => {
+        sortMenu.addEventListener('click', (_e) => {
             const targetOption = event.target.closest('.sort-option');
             if (!targetOption) return;
             const newSortValue = targetOption.dataset.sortValue;
@@ -1206,7 +1206,7 @@ document.addEventListener('DOMContentLoaded', () => {
          });
      }
      if (keywordsTagsContainer) {
-         keywordsTagsContainer.addEventListener('click', (event) => {
+         keywordsTagsContainer.addEventListener('click', (_e) => {
              if (event.target.classList.contains('keyword-tag-button')) {
                  event.target.classList.toggle('active');
              }
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Обработчики меню на карточках "Мои объявления" (Делегирование) ---
      if (myPetsListContainer) {
-         myPetsListContainer.addEventListener('click', async (event) => {
+         myPetsListContainer.addEventListener('click', async (_e) => {
              const toggleButton = event.target.closest('.my-pet-card-menu-toggle');
              const editButton = event.target.closest('.edit-button');
              const deleteButton = event.target.closest('.delete-button');
@@ -1487,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Обработчик для Body (Закрытие меню по клику вне) ---
-    document.body.addEventListener('click', (event) => {
+    document.body.addEventListener('click', (_e) => {
         const hamburgerClicked = event.target.closest('.hamburger-button');
         const overlayClicked = event.target.closest('#menu-overlay');
         const sortMenuElement = document.getElementById('sort-menu'); // Элемент выбран ранее
@@ -1519,7 +1519,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Обработчик кликов внутри основного меню ---
     if (mainMenu) {
-         mainMenu.addEventListener('click', (event) => {
+         mainMenu.addEventListener('click', (_e) => {
              const target = event.target.closest('.menu-item');
              if (!target) return;
              const action = target.dataset.action;
@@ -1552,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
      // --- Обработчики кнопок "Назад" ---
     document.querySelectorAll('.back-button').forEach(button => {
-         button.addEventListener('click', (event) => {
+         button.addEventListener('click', (_e) => {
              const buttonElement = event.currentTarget;
              const targetScreenId = buttonElement.dataset.target;
              if (!targetScreenId) return;

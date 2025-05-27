@@ -5,7 +5,7 @@
   "main": "script.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js --cache"
   },
   "keywords": [],
   "author": "",
