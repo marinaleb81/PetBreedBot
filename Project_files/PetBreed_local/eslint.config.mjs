@@ -5,25 +5,25 @@ import pluginJs from "@eslint/js";
 // import pluginJest from "eslint-plugin-jest";
 
 export default [
+  pluginJs.configs.recommended, // Добавляем базовые рекомендуемые правила ESLint
   {
-    // Глобальные настройки для всех JS файлов
+    // Глобальные настройки для всех JS файлов (можно оставить пустым, если все в pluginJs.configs.recommended)
+    // Но languageOptions и linterOptions лучше оставить для явности
     languageOptions: {
-      ecmaVersion: 2021, // или новее, например, 2022
-      sourceType: "commonjs", // По умолчанию для большинства файлов, если не используешь import/export везде
+      ecmaVersion: 2021,
+      sourceType: "commonjs", // По умолчанию
       globals: {
-        ...globals.browser, // Глобальные переменные браузера (window, document, etc.)
-        // Сюда можно добавить свои глобальные переменные, если они есть и используются во многих файлах
-        // Telegram: true, // Если window.Telegram используется глобально
+        ...globals.browser,
+        // Telegram: "readonly", // Можно определить глобально, если используется везде
       }
     },
     linterOptions: {
-      reportUnusedDisableDirectives: "warn" // или true
+      reportUnusedDisableDirectives: "warn"
     },
     rules: {
-      // Здесь могут быть твои общие правила
-      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }], // Предупреждать о неиспользуемых переменных, но игнорировать те, что начинаются с _
-      "no-empty": ["error", { "allowEmptyCatch": true }], // Разрешить пустые catch, если нужно
-      // "no-prototype-builtins": "off", // Если хочешь временно отключить это правило, но лучше исправить код
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-empty": ["error", { "allowEmptyCatch": true }],
+      // "no-prototype-builtins": "warn", // Лучше исправить код, как обсуждали
     }
   },
   {
@@ -32,43 +32,35 @@ export default [
     languageOptions: {
       sourceType: "commonjs", // У script.js есть module.exports в конце
       globals: {
-        ...globals.browser, // document, window, fetch, alert, etc.
-        Telegram: "readonly", // Предполагая, что window.Telegram.WebApp доступно
-        // Если есть другие глобальные объекты, добавь их
+        ...globals.browser,
+        Telegram: "readonly", // Для window.Telegram.WebApp
       }
     },
     rules: {
-      // Специфичные правила для script.js, если нужны
+      // Сюда можно добавить правила, специфичные только для script.js
+       "no-undef": ["error", { "typeof": true }] // Чтобы typeof module не вызывал ошибку
     }
   },
   {
     // Настройки для тестовых файлов
-    files: ["test/**/*.test.js", "tests/**/*.test.js"], // Путь к твоим тестовым файлам
-    // Если используешь плагин для Jest:
-    // plugins: {
-    //   jest: pluginJest,
-    // },
+    files: ["test/**/*.test.js", "tests/**/*.test.js"],
     languageOptions: {
       globals: {
         ...globals.jest, // describe, test, expect, jest, beforeEach и т.д.
         ...globals.node, // Для require в тестах
       }
     },
-    // Если используешь плагин для Jest:
+    // Если НЕ используешь плагин eslint-plugin-jest, можно временно оставить это:
     // rules: {
-    //   ...pluginJest.configs.recommended.rules,
-    //   // Твои переопределения правил Jest, если нужны
+    //     "no-undef": "off" // Отключает no-undef ТОЛЬКО для тестов
     // }
-    // Если НЕ используешь плагин, но хочешь убрать ошибки no-undef для Jest:
-    rules: {
-        "no-undef": "off" // Временно отключает проверку на неопределенные переменные ТОЛЬКО для тестовых файлов.
-                          // Это быстрый фикс, если не хочешь настраивать плагин Jest сейчас.
-                          // Но лучше настроить плагин или явно указать jest:true в env.
-    }
+    // Но лучше, чтобы globals.jest и globals.node сработали.
+    // Если после исправления конфига все еще будут ошибки no-undef в тестах,
+    // тогда можно вернуть rules: { "no-undef": "off" } сюда как временное решение.
   },
   {
     // Настройки для конфигурационных файлов Node.js
-    files: ["jest.config.js", "eslint.config.mjs"], // Добавь другие, если есть
+    files: ["jest.config.js", "eslint.config.mjs"],
     languageOptions: {
       sourceType: "commonjs",
       globals: {
@@ -76,7 +68,7 @@ export default [
       }
     },
     rules: {
-        "no-unused-vars": "off" // В конфигах часто бывают неиспользуемые переменные из примеров
+        "no-unused-vars": "off" // В конфигах часто бывают неиспользуемые переменные
     }
   }
 ];
