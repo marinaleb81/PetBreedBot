@@ -3,7 +3,7 @@
 // --- Глобальные переменные состояния и для API ---
 //const BACKEND_BASE_URL = 'https://i-love-pets.ru/'; // <-- УСТАНОВИТЕ ПРАВИЛЬНЫЙ URL ДЛЯ ТЕСТА
 //const BACKEND_BASE_URL = ''; // <-- Для продакшена на том же домене
-const BACKEND_BASE_URL = 'http://127.0.0.1:8000';
+const BACKEND_BASE_URL = 'https://i-love-pets.ru';
 let authToken = null;
 let isAuthenticated = false;
 // eslint-disable-next-line no-unused-vars
