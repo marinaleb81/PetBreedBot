@@ -21,7 +21,13 @@
 
 <div id="role-selection-screen" class="screen content-screen hidden">
     <img src="images/logo_secondary.png" alt="Логотип" class="logo small-logo">
-    <p id="user-greeting" style="font-size: 0.9em; margin-bottom: 15px;"></p>
+
+    <div id="auth-section" style="margin-bottom: 20px; text-align: center;">
+        <p id="user-greeting" style="font-size: 0.9em; margin-bottom: 15px; display: none;"></p>
+        <div id="telegram-login-container">
+            </div>
+    </div>
+
     <h2>Что вы хотите сделать?</h2>
     <button id="find-pet-button" class="role-button">Найти питомца</button>
     <button id="place-pet-button" class="role-button">Пристроить питомца</button>
@@ -30,6 +36,7 @@
     <hr style="width: 80%; margin: 25px auto; border: none; border-top: 1px solid #ccc;">
     <button id="my-pets-nav-button" class="role-button">Мои объявления</button>
     <button id="favorites-nav-button" class="role-button">Избранное</button>
+    <button id="logout-button" class="role-button" style="display: none; margin-top: 10px; background-color: #d9534f;">Выйти</button>
 </div>
 
 <div id="animal-type-selection-find-screen" class="screen content-screen hidden">
