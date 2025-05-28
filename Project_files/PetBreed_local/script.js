@@ -3,7 +3,8 @@
 // --- Глобальные переменные состояния и для API ---
 //const BACKEND_BASE_URL = 'https://i-love-pets.ru/'; // <-- УСТАНОВИТЕ ПРАВИЛЬНЫЙ URL ДЛЯ ТЕСТА
 //const BACKEND_BASE_URL = ''; // <-- Для продакшена на том же домене
-const BACKEND_BASE_URL = 'https://i-love-pets.ru';
+//const BACKEND_BASE_URL = 'https://i-love-pets.ru';
+const BACKEND_BASE_URL = window.location.hostname === 'marinaleb81.github.io' ? 'https://i-love-pets.ru' : '';
 let authToken = localStorage.getItem('api_access_token') || null; // Загружаем токен при старте
 let isAuthenticated = !!authToken; // Устанавливаем состояние аутентификации
 // eslint-disable-next-line no-unused-vars
@@ -231,7 +232,7 @@ async function performAuthentication() {
         return;
     }
     try {
-        const response = await fetch(`${BACKEND_BASE_URL}/auth/telegram`, {
+        const response = await fetch(`${BACKEND_BASE_URL}/api/v1/auth/telegram`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ init_data: initDataStr })
