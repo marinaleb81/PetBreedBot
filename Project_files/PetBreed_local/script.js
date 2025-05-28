@@ -1,5 +1,15 @@
 // --- script.js ---
 
+if (window.location.hostname === 'marinaleb81.github.io' && window.location.pathname.startsWith('/PetBreedBot')) {
+    // Перенаправляем, сохраняя путь и параметры, но на новый домен
+    // Убираем /PetBreedBot из pathname, если он не нужен на i-love-pets.ru
+    // Если на i-love-pets.ru ваш проект тоже в /PetBreedBot, то pathname можно оставить
+    // Предположим, на i-love-pets.ru проект в корне:
+    let newPathname = window.location.pathname.replace(/^\/PetBreedBot/, '');
+    if (newPathname === '') newPathname = '/'; // Если остался пустой путь, делаем его корневым
+    window.location.href = 'https://i-love-pets.ru' + newPathname + window.location.search + window.location.hash;
+}
+
 // --- Глобальные переменные состояния и для API ---
 //const BACKEND_BASE_URL = 'https://i-love-pets.ru/'; // <-- УСТАНОВИТЕ ПРАВИЛЬНЫЙ URL ДЛЯ ТЕСТА
 //const BACKEND_BASE_URL = ''; // <-- Для продакшена на том же домене
