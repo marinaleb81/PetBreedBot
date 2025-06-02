@@ -6,15 +6,14 @@ import json
 from urllib.parse import unquote, parse_qs
 from typing import Dict, Optional
 import logging
-
-from fastapi import APIRouter, Depends, HTTPException, status, Body # Используем Body для initData
+from fastapi import APIRouter, Depends, HTTPException, status, Body 
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 
 from database import get_db
 from models import User as UserModel
-from schemas import User as UserSchema, Token, TelegramInitData # Импорт схемы для initData
-from auth import create_access_token # Импортируем функцию создания токена из auth.py
+from schemas import User as UserSchema, Token, TelegramInitData 
+from auth import create_access_token 
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -24,7 +23,6 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if not TELEGRAM_BOT_TOKEN:
     print("ПРЕДУПРЕЖДЕНИЕ: TELEGRAM_BOT_TOKEN не найден в .env файле! Валидация initData не будет работать.")
-    # Можно либо упасть с ошибкой, либо просто предупредить
 
 def validate_init_data(init_data: str, bot_token: str) -> Optional[Dict]:
     """Проверяет хэш initData и возвращает данные пользователя, если валидно."""
@@ -70,7 +68,6 @@ def validate_init_data(init_data: str, bot_token: str) -> Optional[Dict]:
 
 @router.post("/telegram", response_model=Token)
 async def authenticate_telegram(
-    # Принимаем initData в теле запроса как строку
     payload: TelegramInitData = Body(...),
     db: Session = Depends(get_db)
 ):
@@ -94,15 +91,12 @@ async def authenticate_telegram(
     db_user = db.query(UserModel).filter(UserModel.telegram_id == telegram_id).first()
 
     if not db_user:
-        # Пользователь не найден - создаем нового
         print(f"Создание нового пользователя с Telegram ID: {telegram_id}")
-        # Определяем статус - пока по умолчанию "Усыновитель"
-        # TODO: Реализовать механизм выбора статуса при первом входе (запрос с фронта?)
         user_status = "Усыновитель"
 
         new_user_data = {
             "telegram_id": telegram_id,
-            "username": user_data.get('username') or f"user_{telegram_id}", # Берем username из TG или генерируем
+            "username": user_data.get('username') or f"user_{telegram_id}",
             "status": user_status
             # email и password оставляем null
         }
@@ -115,13 +109,10 @@ async def authenticate_telegram(
         except Exception as e:
             db.rollback()
             print(f"Ошибка при создании пользователя: {e}")
-            # Возможно, пользователь с таким telegram_id уже был создан в параллельном запросе? Попробуем найти еще раз.
             db_user = db.query(UserModel).filter(UserModel.telegram_id == telegram_id).first()
             if not db_user: # Если все еще не найден, то реальная ошибка
                  raise HTTPException(status_code=500, detail="Не удалось создать пользователя")
 
-    # Пользователь найден или создан, генерируем токен
-    # В 'sub' передаем внутренний ID пользователя из нашей БД
     access_token = create_access_token(data={"sub": str(db_user.id)})
     print(f"Выдан JWT для пользователя: ID={db_user.id}, TG_ID={telegram_id}")
 
@@ -130,7 +121,6 @@ async def authenticate_telegram(
 
 @router.get("/generate_test_token/{user_id}", include_in_schema=False)
 async def generate_test_token_for_user(user_id: int):
-    # ВНИМАНИЕ: Только для тестирования! Удалить или защитить перед публикацией.
     print(f"--- ВНИМАНИЕ: Генерация тестового токена для пользователя ID: {user_id} ---")
     access_token = create_access_token(data={"sub": str(user_id)})
     return {"user_id": user_id, "test_access_token": access_token}

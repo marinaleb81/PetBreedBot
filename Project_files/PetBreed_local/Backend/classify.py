@@ -1,8 +1,6 @@
 # classify.py
 
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form, Depends
-# Removed unused: HTTPBearer
-# Removed unused: shutil
 from google.cloud import vision
 from google.cloud import secretmanager
 import os
@@ -15,10 +13,15 @@ from datetime import datetime
 from typing import List, Optional, Dict
 import requests
 import httpx
-import asyncio  # <--- ДОБАВИТЬ
-from collections import Counter # <--- ДОБАВИТЬ
-from fastapi import APIRouter, File, UploadFile, HTTPException, Form, Depends, status # <--- ДОБАВИТЬ status
+import asyncio  
+from collections import Counter 
+from fastapi import APIRouter, File, UploadFile, HTTPException, Form, Depends, status 
 from auth import get_current_user
+import google.generativeai as genai
+import requests
+import os
+import logging
+import re
 # ...
 
 # Schemas and Models
@@ -36,12 +39,37 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 router = APIRouter(tags=["classify"])
 
-# API-ключ для Mistral
+# API-ключ для Mistral (оставляем, если он используется где-то еще)
 MISTRAL_TOKEN = os.getenv("MISTRAL_TOKEN")
-if not MISTRAL_TOKEN:
-    logger.warning("MISTRAL_TOKEN не указан. Проверка текста на оскорбительность и запрос рекомендаций будут недоступны.")
 
-# --- BREEDS_MAP Loading ---
+# --- НАСТРОЙКА GEMINI API ---
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash-latest")
+HTTPS_PROXY = os.getenv("HTTPS_PROXY")
+gemini_generative_model = None
+
+if not GEMINI_API_KEY:
+    logger.warning("GEMINI_API_KEY не указан. Функции проверки текста на токсичность и получения рекомендаций через Gemini будут недоступны.")
+else:
+    try:
+        # Настройка прокси через переменные окружения
+        if HTTPS_PROXY:
+            os.environ['HTTP_PROXY'] = HTTPS_PROXY
+            os.environ['HTTPS_PROXY'] = HTTPS_PROXY
+            logger.info(f"Установлен прокси для Gemini API: {HTTPS_PROXY}")
+        else:
+            logger.warning("HTTPS_PROXY не указан в .env файле.")
+
+        # Дополнительное логирование текущих переменных окружения
+        logger.debug(f"Текущие переменные окружения для прокси: HTTP_PROXY={os.getenv('HTTP_PROXY')}, HTTPS_PROXY={os.getenv('HTTPS_PROXY')}")
+
+        genai.configure(api_key=GEMINI_API_KEY)
+        gemini_generative_model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+        logger.info(f"Google Gemini Client инициализирован с моделью {GEMINI_MODEL_NAME}.")
+    except Exception as e:
+        logger.error(f"КРИТИЧЕСКАЯ ОШИБКА: Не удалось инициализировать Google Gemini Client: {e}", exc_info=True)
+        gemini_generative_model = None
+        
 try:
     # Assumes breeds_map.json is in the same directory or accessible from where the app runs
     with open("breeds_map.json", "r", encoding="utf-8") as f:
@@ -68,7 +96,7 @@ def get_credentials():
         if os.getenv("RENDER"):
             logger.info("Обнаружена среда Render. Получение ключей из Secret Manager...")
             client = secretmanager.SecretManagerServiceClient()
-            secret_name = "projects/pet-recognizer-bot/secrets/pet-recognizer-bot-credentials/versions/latest" # Убедитесь, что имя корректное
+            secret_name = "projects/pet-recognizer-bot/secrets/pet-recognizer-bot-credentials/versions/latest" 
             response = client.access_secret_version(request={"name": secret_name})
             payload = response.payload.data.decode("UTF-8")
             info = json.loads(payload)
@@ -112,11 +140,9 @@ def detect_breed(image_data: bytes) -> Dict[str, Optional[str]]:
     """
     if not vision_client:
          logger.error("Vision API client не инициализирован. Анализ породы невозможен.")
-         # Важно вернуть None или поднять ошибку, т.к. без клиента функция бесполезна
-         # Возврат None для типа и породы соответствует ожиданиям вызывающего кода.
          return {"type": None, "breed": None}
 
-    if not BREEDS_MAP or not BREEDS_MAP.get("types"): # Базовая проверка словаря
+    if not BREEDS_MAP or not BREEDS_MAP.get("types"): 
         logger.error("Словарь пород BREEDS_MAP пуст или некорректен. Анализ породы невозможен.")
         return {"type": None, "breed": None}
 
@@ -144,7 +170,7 @@ def detect_breed(image_data: bytes) -> Dict[str, Optional[str]]:
         plausible_breeds = []
         best_dog_term_score = 0.0
         best_cat_term_score = 0.0
-        GENERAL_TERM_THRESHOLD = 0.5 # Порог для определения типа по общим словам
+        GENERAL_TERM_THRESHOLD = 0.5
 
         # 1. Анализ сущностей
         for entity in web_detection.web_entities:
@@ -198,83 +224,134 @@ def detect_breed(image_data: bytes) -> Dict[str, Optional[str]]:
 
 
 def check_image_for_animals(image_data: bytes) -> bool:
-    """
-    Проверяет наличие ровно 1 кошки/собаки через Vision Object Localization.
-    Использует ГЛОБАЛЬНЫЙ vision_client.
-    """
     if not vision_client:
         logger.error("Vision API client не инициализирован. Проверка изображения (Object Localization) невозможна.")
-        return False # Невозможно выполнить проверку
-
+        return False
     try:
         image = vision.Image(content=image_data)
         logger.info("Отправка запроса Object Localization в Vision API...")
         objects = vision_client.object_localization(image=image).localized_object_annotations
         logger.info(f"Получено {len(objects)} объектов от Object Localization.")
-
         animal_count = 0
         detected_object_names = [obj.name for obj in objects]
+        logger.debug(f"Обнаруженные объекты: {detected_object_names}")
         for name in detected_object_names:
             if name.lower() in ["dog", "cat", "собака", "кошка", "пес", "кот"]:
                 animal_count += 1
-
-        logger.info(f"Обнаруженные объекты: {', '.join(detected_object_names)}. Найдено животных (кошка/собака): {animal_count}")
-
+                logger.info(f"Обнаружено животное: {name} (подсчет: {animal_count})")
+        logger.info(f"Итоговое количество животных (кошка/собака): {animal_count}")
         if animal_count == 1:
             logger.info("Проверка изображения (check_image_for_animals) пройдена: найдена ровно 1 кошка или собака.")
             return True
         else:
-            logger.warning(f"Проверка изображения не пройдена: найдено {animal_count} животных (требуется ровно 1).")
+            logger.warning(f"Проверка изображения не пройдена: найдено {animal_count} животных (требуется ровно 1). Объекты: {detected_object_names}")
             return False
-
     except Exception as e:
         logger.error(f"Ошибка при проверке изображения в check_image_for_animals: {e}", exc_info=True)
-        return False # Считаем проверку неуспешной при ошибке
+        return False
 
 
 def check_text_for_toxicity(text: str) -> bool:
-    """Проверяет текст на токсичность с помощью Mistral API (synchronous)."""
-    if not text or not text.strip(): # Проверка на пустой или состоящий из пробелов текст
+    if not text or not text.strip():
+        logger.info("Empty text, considered non-toxic")
         return False
-    if not MISTRAL_TOKEN:
-        logger.warning("Пропускаем проверку текста на токсичность, MISTRAL_TOKEN не указан.")
-        return False # Считаем нетоксичным по умолчанию
-
-    mistral_url = "https://api.mistral.ai/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {MISTRAL_TOKEN}",
-        "Content-Type": "application/json"
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        logger.warning("GEMINI_API_KEY not found")
+        return False
+    proxy_url = os.getenv('HTTPS_PROXY')
+    proxies = {
+        'http': proxy_url,
+        'https': proxy_url
     }
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": api_key
+    }
+    # Step 1: Check for threats to life (targeting cats or dogs)
+    threat_pattern = r'\b(убью|убить|убийство|зарежу|прикончу|атакую|убей|убивай)\b.*\b(кошка|кот|собака|пёс|пес)\b'
+    if re.search(threat_pattern, text, flags=re.IGNORECASE):
+        logger.info(f"Text contains threats to life targeting a cat or dog, marked as toxic: {text[:50]}...")
+        return True
+    # Step 2: Check for threats of sexual violence (targeting cats or dogs)
+    sexual_threat_pattern = r'\b(изнасилую|трахну|трах|секс|насилую|похоть|изнасилование)\b.*\b(кошка|кот|собака|пёс|пес)\b'
+    if re.search(sexual_threat_pattern, text, flags=re.IGNORECASE):
+        logger.info(f"Text contains threats of sexual violence targeting a cat or dog, marked as toxic: {text[:50]}...")
+        return True
+    # Step 3: Check for Russian swearing
+    swearing_pattern = r'\b(хуй|пиздец|блять|ебать|сука|пизда|долбоёб|еблан|нахуй|блядь|хуесос|пидор|гандон)\b'
+    if re.search(swearing_pattern, text, flags=re.IGNORECASE):
+        logger.info(f"Text contains Russian swearing, marked as toxic: {text[:50]}...")
+        return True
+    # Step 4: Use Gemini API for deeper context analysis
     prompt = (
-        f"Is the following Russian text offensive or toxic? Offensive/toxic text includes swearing, insults, "
-        f"hate speech, sexual content, or calls for violence against people or animals. "
+        f"Is the following Russian text offensive, toxic, or inappropriate when describing a cat or dog? "
+        f"Evaluate it in the context of pet-related content (e.g., adoption announcements). "
+        f"Check for: "
+        f"1. Threats to life (e.g., 'убью', 'убить' specifically targeting a cat or dog), "
+        f"2. Threats of sexual violence (e.g., 'изнасилую', 'трахну' targeting a cat or dog), "
+        f"3. Russian swearing (e.g., 'пиздец', 'блять'), "
+        f"4. Insults, hate speech, or sexual content. "
+        f"Consider phrases like 'убью собаку' or 'трахну кота' as toxic, but 'убью муху' as non-toxic unless context suggests otherwise. "
         f"Text: '{text}'\n"
-        f"Answer ONLY with 'toxic' or 'not toxic'."
+        f"Answer ONLY with 'toxic' or 'not toxic'. Be strict and assume ambiguity as 'toxic' if it could relate to a cat or dog."
     )
     payload = {
-        "model": "mistral-large-latest", # Или mistral-small-latest
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.1,
-        "max_tokens": 10
+        "contents": [{"parts": [{"text": prompt}]}]
     }
-
     try:
-        response = requests.post(mistral_url, headers=headers, json=payload, timeout=20) # Увеличим таймаут
+        logger.info(f"Toxicity check for '{text[:50]}...'")
+        response = requests.post(url, json=payload, headers=headers, proxies=proxies, timeout=10)
         response.raise_for_status()
-        result = response.json()
-        logger.info(f"Ответ от Mistral (toxicity check): {result}")
-
-        content = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip().lower()
-        logger.info(f"Mistral classification: '{content}'")
-        is_toxic = (content == "toxic")
-        return is_toxic
-
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Сетевая ошибка при проверке текста на оскорбительность: {e}")
+        content = response.json()['candidates'][0]['content']['parts'][0]['text'].strip().lower()
+        logger.info(f"Toxicity result: '{content}'")
+        return content == "toxic"
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 400:
+            logger.warning(f"HTTP 400 error, assuming toxic: {e.response.text}")
+            return True
+        logger.error(f"HTTP error: {e}", exc_info=True)
         return False
     except Exception as e:
-        logger.error(f"Ошибка при проверке текста на оскорбительность: {e}", exc_info=True)
+        logger.error(f"General error: {e}", exc_info=True)
         return False
+
+async def get_recommendations_gemini(subject: str) -> str:
+    if not subject:
+        logger.info("No subject provided, returning None")
+        return None
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        logger.warning("GEMINI_API_KEY not found")
+        return None
+    proxy_url = os.getenv('HTTPS_PROXY')
+    proxies = {
+        'http': proxy_url,
+        'https': proxy_url
+    }
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+    headers = {
+        "Content-Type": "application/json",
+        "x-goog-api-key": api_key
+    }
+    prompt = (
+        f"You are a veterinary assistant. Provide 2-3 short recommendations for care and feeding of '{subject}'. "
+        f"Answer only with a numbered or bulleted list in Russian, no introductions or conclusions."
+    )
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}]
+    }
+    try:
+        logger.info(f"Recommendations request for '{subject}'")
+        response = requests.post(url, json=payload, headers=headers, proxies=proxies, timeout=10)
+        response.raise_for_status()
+        text = response.json()['candidates'][0]['content']['parts'][0]['text']
+        logger.info(f"Recommendations received: {text}")
+        return text
+    except Exception as e:
+        logger.error(f"Error getting recommendations: {e}", exc_info=True)
+        return None
 
 
 async def get_recommendations_mistral(subject: str) -> Optional[str]:
@@ -444,14 +521,14 @@ async def create_announcement(
         if not check_image_for_animals(image_content_for_check):
             logger.warning(f"Модерация изображения не пройдена для {image.filename}.")
             moderation_passed = False
-            moderation_error_detail = "Image moderation failed: Exactly one cat or dog required."
+            moderation_error_detail = "Модерация изображения не пройдена: на фото должна быть одна кошка или одна собака."
         else:
             logger.info("Проверка изображения пройдена.")
     else:
         # Это странная ситуация, файл должен был быть прочитан
         logger.error("Не удалось получить контент изображения для модерации.")
         moderation_passed = False
-        moderation_error_detail = "Failed to read image content for moderation."
+        moderation_error_detail = "Не удалось прочитать содержимое изображения для модерации."
 
     # 2. Text Moderation (only if image moderation passed)
     if moderation_passed:
@@ -467,7 +544,7 @@ async def create_announcement(
             if check_text_for_toxicity(full_text_to_check):
                 logger.warning(f"Модерация текста не пройдена для объявления пользователя {user_id_int}.")
                 moderation_passed = False
-                moderation_error_detail = "Text moderation failed: Offensive content detected."
+                moderation_error_detail = "Модерация текста не пройдена: обнаружено недопустимое содержимое."
             else:
                 logger.info("Проверка текста на токсичность пройдена.")
         else:
@@ -600,8 +677,6 @@ async def search_announcements(
             logger.error(f"Ошибка при обработке референсного изображения {image.filename}: {e}", exc_info=True)
             # Continue search without suggestions
         finally:
-             # No need to close file after read()
-             # No temporary file saving in this version
              pass
 
     # --- Database Search ---
@@ -623,8 +698,6 @@ async def search_announcements(
         announcements = query.order_by(AnnouncementModel.timestamp.desc()).limit(50).all() # Limit results
         logger.info(f"Найдено {len(announcements)} объявлений после фильтрации.")
 
-        # Convert to response model (requires eager loading or correct relationship setup)
-        # Assuming relationships are loaded correctly by default or via session config
         result_list = [AnnouncementResponse.from_orm(ann) for ann in announcements]
 
         return {
@@ -690,7 +763,7 @@ async def identify_breed_endpoint(
         # 3. Get Recommendations from Mistral
         recommendations = None
         if recommendation_subject:
-            recommendations = await get_recommendations_mistral(recommendation_subject)
+            recommendations = await get_recommendations_gemini(recommendation_subject)
 
         # 4. Format and return response
         response_data = BreedIdentificationResult(
@@ -708,15 +781,11 @@ async def identify_breed_endpoint(
         logger.error(f"Неожиданная ошибка при обработке /identify_breed для {image.filename}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing image.")
     finally:
-        # Cleanup - close all received files (though read() should handle it)
-        # No temporary files saved in this version to clean up
         pass
 
 
 @router.post("/identify_breed_multi", response_model=BreedIdentificationResult)
 async def identify_breed_multi_endpoint(
-    # Добавляем зависимость для аутентификации
-    # current_user: UserModel = Depends(get_current_user),
     # Ожидаем три файла
     image_front: UploadFile = File(..., description="Изображение: Вид спереди"),
     image_side: UploadFile = File(..., description="Изображение: Вид сбоку"),
@@ -837,7 +906,7 @@ async def identify_breed_multi_endpoint(
 
         recommendations = None
         if recommendation_subject:
-             recommendations = await get_recommendations_mistral(recommendation_subject)
+             recommendations = await get_recommendations_gemini(recommendation_subject)
 
         # --- 5. Формирование ответа ---
         response_data = BreedIdentificationResult(
@@ -862,4 +931,3 @@ async def identify_breed_multi_endpoint(
                 except Exception as close_exc:
                     logger.warning(f"Не критичная ошибка при закрытии файла {file_to_close.filename}: {close_exc}")
 
-# --- КОНЕЦ ОБНОВЛЕННОГО ЭНДПОИНТА ---

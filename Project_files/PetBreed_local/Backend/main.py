@@ -43,8 +43,8 @@ script_path_obj = Path(__file__).parent  # Path('E:/PetPreed/PetPreed/Backend')
 project_root = script_path_obj.parent  # Path('E:/PetPreed/PetPreed')
 
 # Определяем пути к нужным папкам и файлам относительно КОРНЯ ПРОЕКТА
-icon_dir_path = project_root / "icon"  # Path('E:/PetPreed/PetPreed/icon')
-images_dir_path = project_root / "images"  # Path('E:/PetPreed/PetPreed/images')
+icon_dir_path = project_root / "icon"  
+images_dir_path = project_root / "images"  
 index_path_obj = project_root / "index.html"
 script_js_path_obj = project_root / "script.js"
 style_css_path_obj = project_root / "style.css"
@@ -90,7 +90,7 @@ async def serve_style():
 # --- Настройка CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Настройте для продакшена!
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

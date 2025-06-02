@@ -2,15 +2,14 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session, joinedload # Добавили joinedload, если еще не было
-from typing import List, Optional # <--- ДОБАВИТЬ List сюда (Optional может уже быть)
+from sqlalchemy.orm import Session, joinedload
+from typing import List, Optional
 import logging
-# Импорты из ваших модулей
 from database import get_db
-from auth import create_access_token # Если /token используется
-from auth import get_current_user # Если используется для защищенных эндпоинтов
+from auth import create_access_token
+from auth import get_current_user 
 from models import Announcement as AnnouncementModel, Pet as PetModel, User as UserModel
-from schemas import UserCreate, User as UserSchema, Token, AnnouncementResponse # Добавили AnnouncementResponse
+from schemas import UserCreate, User as UserSchema, Token, AnnouncementResponse
 from passlib.context import CryptContext
 import os
 from dotenv import load_dotenv
@@ -26,32 +25,24 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# --- НОВЫЙ ЭНДПОИНТ "МОИ ОБЪЯВЛЕНИЯ" (ИСПРАВЛЕННЫЙ) ---
 @router.get("/me/announcements", response_model=List[AnnouncementResponse])
-# VVV --- ДОБАВЛЯЕМ ЗАВИСИМОСТЬ get_current_user --- VVV
 def get_my_announcements(
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user) # Получаем текущего пользователя
+    current_user: UserModel = Depends(get_current_user) 
 ):
-    # --- УДАЛЯЕМ ИЛИ КОММЕНТИРУЕМ ТЕСТОВЫЙ БЛОК ---
-    # MOCK_DB_USER_ID = 1
-    # user_id_to_filter = MOCK_DB_USER_ID
-    # print(f"Запрос 'Мои объявления' для тестового пользователя ID: {user_id_to_filter}")
-    # --- КОНЕЦ УДАЛЯЕМОГО БЛОКА ---
 
     # Используем ID реального пользователя из токена
     user_id_to_filter = current_user.id
-    print(f"Запрос 'Мои объявления' для пользователя ID: {user_id_to_filter}") # Теперь будет правильный ID
+    print(f"Запрос 'Мои объявления' для пользователя ID: {user_id_to_filter}") 
 
     try:
         my_announcements = db.query(AnnouncementModel).options(
             joinedload(AnnouncementModel.user), # Загружаем юзера для ответа
             joinedload(AnnouncementModel.pet)   # Загружаем питомца для ответа
         ).filter(
-            # VVV --- ФИЛЬТРУЕМ ПО РЕАЛЬНОМУ user_id --- VVV
             AnnouncementModel.user_id == user_id_to_filter
         ).order_by(
-            AnnouncementModel.timestamp.desc() # Сначала новые
+            AnnouncementModel.timestamp.desc() 
         ).all()
 
         print(f"Найдено {len(my_announcements)} объявлений для пользователя {user_id_to_filter}")
@@ -60,39 +51,18 @@ def get_my_announcements(
     except Exception as e:
         print(f"Ошибка при получении 'моих' объявлений для user ID {user_id_to_filter}: {e}")
         raise HTTPException(status_code=500, detail="Не удалось получить список ваших объявлений")
-# --- КОНЕЦ ЭНДПОИНТА ---
 
-# --- НОВЫЙ ЭНДПОИНТ: Получить ИЗБРАННЫЕ объявления ---
 @router.get("/me/favorites", response_model=List[AnnouncementResponse])
 def get_my_favorites(
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user) # <--- ИСПОЛЬЗУЕМ РЕАЛЬНОГО ПОЛЬЗОВАТЕЛЯ
+    current_user: UserModel = Depends(get_current_user) 
 ):
-    # Блок с MOCK_DB_USER_ID УДАЛЕН
-
-    # Проверяем, что пользователь загружен (хотя Depends должен это гарантировать)
     if not current_user:
-        # Эта ситуация маловероятна, если get_current_user работает
+
         raise HTTPException(status_code=404, detail="Пользователь не найден (ошибка зависимости)")
 
-    logger.info(f"Запрос 'Избранное' для пользователя ID: {current_user.id}.") # Используем logger
+    logger.info(f"Запрос 'Избранное' для пользователя ID: {current_user.id}.") 
 
-    # SQLAlchemy автоматически загрузит связанные favorite_announcements
-    # благодаря настройкам relationship в models.py (lazy='selectin' или дефолтный select).
-    # Нет необходимости делать здесь отдельный запрос с joinedload, если get_current_user
-    # уже вернул пользователя, привязанного к сессии db.
-
-    # Просто возвращаем список избранных объявлений ТЕКУЩЕГО пользователя
-    # Pydantic сам преобразует их в List[AnnouncementResponse] благодаря response_model
-    # Убедись, что в User.favorite_announcements загружаются связанные Pet и User для AnnouncementResponse
-    # Можно явно подгрузить, если нужно:
-    # fav_announcements = current_user.favorite_announcements # Получаем список
-    # # Опционально: Убедимся, что все связи загружены (если не настроена eager loading)
-    # for ann in fav_announcements:
-    #     db.refresh(ann, attribute_names=['pet', 'user'])
-    # return fav_announcements
-
-    # Обычно достаточно просто вернуть коллекцию:
     return current_user.favorite_announcements
 
 def create_access_token(data: dict):

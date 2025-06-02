@@ -8,16 +8,11 @@ from sqlalchemy import desc, asc
 from typing import List, Optional
 import os
 import shutil
-from datetime import datetime # <-- Убедимся, что datetime импортирован
+from datetime import datetime 
 from database import get_db
-# Импортируем модели с псевдонимами
 from models import Announcement as AnnouncementModel, Pet as PetModel, User as UserModel
-# Импортируем схему ответа
 from schemas import AnnouncementResponse
-# Импорт для поиска пары (если используется) - убедитесь, что он есть, если эндпоинт find_mate активен
-# from schemas import PetMateInput # Похоже, не используется напрямую в параметрах find_mate
-from auth import get_current_user # Используем реальную аутентификацию
-# Убедимся, что UserModel импортирован (дублирование не страшно)
+from auth import get_current_user
 from models import User as UserModel
 
 # --- Начало определения роутера ---
@@ -164,12 +159,6 @@ async def request_contact(
     if owner.id == requester.id:
          raise HTTPException(status_code=400, detail="Вы не можете запросить контакт по своему объявлению.")
 
-    # --- НАЧАЛО УДАЛЕНИЯ/КОММЕНТИРОВАНИЯ ---
-    # Эта проверка больше не нужна, так как согласие подразумевается фактом существования объявления
-    # if not owner.allow_contact_requests:
-    #      raise HTTPException(status_code=403, detail="Владелец не разрешил запросы на связь.")
-    # --- КОНЕЦ УДАЛЕНИЯ/КОММЕНТИРОВАНИЯ ---
-
     # Проверка, есть ли у владельца Telegram ID для отправки уведомления (остается)
     if not owner.telegram_id:
         raise HTTPException(status_code=400, detail="Невозможно отправить запрос владельцу (отсутствует Telegram ID).")
@@ -239,16 +228,16 @@ async def update_announcement(
     age: Optional[int] = Form(None),
     breed: Optional[str] = Form(None),
     color: Optional[str] = Form(None),
-    isNeuteredStr: Optional[str] = Form(None, alias='isNeutered'), # Принимаем как строку
-    isVaccinatedStr: Optional[str] = Form(None, alias='isVaccinated'), # Принимаем как строку
+    isNeuteredStr: Optional[str] = Form(None, alias='isNeutered'), 
+    isVaccinatedStr: Optional[str] = Form(None, alias='isVaccinated'), 
     size: Optional[str] = Form(None),
     keywords: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
     city: Optional[str] = Form(None),
-    image: Optional[UploadFile] = File(None), # Необязательное новое изображение
+    image: Optional[UploadFile] = File(None), 
     # --- Зависимости ---
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user) # Используем реального пользователя
+    current_user: UserModel = Depends(get_current_user) 
 ):
     ''' Обновляет существующее объявление. '''
     logger.info(f"Попытка обновить объявление ID: {announcement_id} пользователем ID: {current_user.id}")
@@ -275,7 +264,6 @@ async def update_announcement(
              logger.error(f"Связанный питомец для объявления {announcement_id} не найден!")
              raise HTTPException(status_code=500, detail="Внутренняя ошибка: Связанный питомец не найден")
 
-        # --- ИСПРАВЛЕННЫЙ БЛОК ОБРАБОТКИ НОВОГО ИЗОБРАЖЕНИЯ ---
         old_image_url_path = announcement.image_path # Путь из БД (напр., /images/old.jpg)
         new_image_url_path = old_image_url_path # По умолчанию оставляем старый
 
@@ -307,7 +295,7 @@ async def update_announcement(
             # 2. Сохраняем новый файл
             try:
                 # Абсолютный путь к папке images уже есть в images_dir_absolute_ann
-                os.makedirs(images_dir_absolute_ann, exist_ok=True) # Убедимся, что папка существует
+                os.makedirs(images_dir_absolute_ann, exist_ok=True) 
 
                 # Генерируем имя файла
                 timestamp_now = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -316,18 +304,14 @@ async def update_announcement(
                 unique_filename = f"{timestamp_now}_{current_user.id}_{safe_filename}"
 
                 # ПОЛНЫЙ путь для сохранения файла в ОС
-                new_image_os_path_absolute = os.path.join(images_dir_absolute_ann, unique_filename) # => E:\...\PetPreed\images\new_file.jpg
+                new_image_os_path_absolute = os.path.join(images_dir_absolute_ann, unique_filename) 
                 # ОТНОСИТЕЛЬНЫЙ URL путь для сохранения в БД
-                new_image_url_path = f"images/{unique_filename}"     # => /images/new_file.jpg
+                new_image_url_path = f"images/{unique_filename}"     
 
                 # Читаем и сохраняем по АБСОЛЮТНОМУ пути
                 # Используем shutil.copyfileobj для эффективности с большими файлами
                 with open(new_image_os_path_absolute, "wb") as buffer:
                      shutil.copyfileobj(image.file, buffer)
-                # Или если файлы небольшие:
-                # file_content = await image.read()
-                # with open(new_image_os_path_absolute, "wb") as buffer:
-                #     buffer.write(file_content)
 
                 logger.info(f"Новое изображение сохранено: {new_image_os_path_absolute}")
                 # Обновляем путь в объекте объявления на НОВЫЙ URL путь
@@ -337,8 +321,6 @@ async def update_announcement(
                  logger.error(f"Ошибка сохранения нового изображения при обновлении: {e}")
                  # НЕ МЕНЯЕМ путь, если сохранение не удалось
                  announcement.image_path = old_image_url_path # Оставляем старый путь
-                 # Возможно, стоит вернуть ошибку пользователю?
-                 # raise HTTPException(status_code=500, detail=f"Ошибка сохранения файла изображения: {e}")
             finally:
                 # Обязательно закрываем файл, даже если была ошибка
                 await image.close()
@@ -377,14 +359,6 @@ async def update_announcement(
         # announcement.image_path УЖЕ ОБНОВЛЕН выше, если было новое фото
         logger.info(f"Данные объявления ID {announcement.id} подготовлены к обновлению. Image path: {announcement.image_path}")
 
-        # --- Логика обновления флага согласия (если нужна) ---
-        # consent_given: bool = Form(False) # Добавить в параметры Form() выше
-        # if consent_given is not None and consent_given != current_user.allow_contact_requests:
-        #     logger.info(f"Обновляем allow_contact_requests на {consent_given} для пользователя {current_user.id}")
-        #     current_user.allow_contact_requests = consent_given
-        #     db.add(current_user) # Добавляем пользователя в сессию для обновления
-
-        # --- Сохранение изменений в БД ---
         try:
             db.add(announcement) # Добавляем обновленный объект объявления (и питомца через связь)
             # Если обновляли current_user, он тоже будет добавлен
@@ -442,39 +416,6 @@ def add_favorite(
         db.rollback()
         logger.error(f"Ошибка добавления в избранное для user {user.id}, ann {announcement_id}: {e}")
         raise HTTPException(status_code=500, detail="Не удалось добавить в избранное")
-
-# --- ЭНДПОИНТ: Удалить из избранного ---
-# @router.delete("/{announcement_id}/favorite", status_code=status.HTTP_204_NO_CONTENT)
-# def remove_favorite(
-#     announcement_id: int,
-#     db: Session = Depends(get_db),
-#     current_user: UserModel = Depends(get_current_user)
-# ):
-#     """ Удаляет объявление из списка избранного текущего пользователя. """
-#     user = db.query(UserModel).options(
-#         joinedload(UserModel.favorite_announcements)
-#     ).filter(UserModel.id == current_user.id).first()
-#
-#     announcement = db.query(AnnouncementModel).filter(AnnouncementModel.id == announcement_id).first()
-#     if not announcement:
-#         # Идемпотентность: если объявления нет, считаем "удаление" успешным
-#         logger.warning(f"Попытка удалить из избранного несуществующее объявление {announcement_id} (user {user.id})")
-#         return None # 204 No Content
-#
-#     if announcement not in user.favorite_announcements:
-#         # Идемпотентность: если уже не в избранном, считаем "удаление" успешным
-#         logger.info(f"Объявления {announcement_id} нет в избранном у пользователя {user.id}, удаление не требуется.")
-#         return None # 204 No Content
-#
-#     user.favorite_announcements.remove(announcement)
-#     try:
-#         db.commit()
-#         logger.info(f"Объявление {announcement_id} удалено из избранного пользователя {user.id}")
-#         return None # Успешное удаление, возвращаем None для статуса 204
-#     except Exception as e:
-#         db.rollback()
-#         logger.error(f"Ошибка удаления из избранного для user {user.id}, ann {announcement_id}: {e}")
-#         raise HTTPException(status_code=500, detail="Не удалось удалить из избранного")
 
 @router.delete("/{announcement_id}/favorite", status_code=status.HTTP_204_NO_CONTENT)
 def remove_favorite(
@@ -580,11 +521,6 @@ async def delete_announcement_endpoint(
                  logger.error(f"Не удалось удалить файл {full_os_path_to_delete} при удалении объявления {announcement_id}: {e}")
 
         # 2. Удаляем запись из БД
-        # Если в модели Announcement настроено cascade="all, delete-orphan" для связи 'pet',
-        # SQLAlchemy должен удалить и связанного питомца.
-        # Если нет, возможно, питомца нужно удалять вручную перед объявлением:
-        # pet_to_delete = announcement.pet
-        # if pet_to_delete: db.delete(pet_to_delete)
         db.delete(announcement)
         db.commit()
         logger.info(f"Объявление ID {announcement_id} (и связанный питомец, если настроено cascade) успешно удалено из БД.")
@@ -629,9 +565,6 @@ async def find_pet_mate(
             PetModel.animal_type == animal_type,       # Тот же вид животного
             PetModel.gender == target_gender,          # Противоположный пол
             PetModel.age >= 1,                         # Возраст питомца для вязки >= 1 года (пример)
-            # Дополнительные условия (опционально):
-            # PetModel.isNeutered == False, # Ищем только не стерилизованных/кастрированных
-            # PetModel.breed.ilike(f"%{breed}%"), # Строгое совпадение породы (убрано ниже, т.к. есть нестрогий фильтр)
         )
 
         # Фильтр по породе (нестрогий)

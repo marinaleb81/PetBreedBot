@@ -5,14 +5,12 @@ from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-# Включаем логирование для отладки
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logging.getLogger("httpx").setLevel(logging.WARNING) 
 logger = logging.getLogger(__name__)
 
-# Загружаем переменные окружения (токен бота)
 load_dotenv()
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if not TELEGRAM_BOT_TOKEN:
@@ -61,11 +59,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик текстовых сообщений (можно добавить логику)."""
-    # Пока просто логируем сообщение
-    # В будущем можно проверять текст на команды или ключевые слова, если нужно
     user_text = update.message.text
     logger.info(f"Получено сообщение от {update.effective_user.username}: {user_text}")
-    # await update.message.reply_text(f"Вы написали: {user_text}") # Пример ответа
 
 
 def main() -> None:

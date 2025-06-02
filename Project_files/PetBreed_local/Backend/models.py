@@ -10,7 +10,6 @@ favorites_table = Table('favorites', Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
     Column('announcement_id', Integer, ForeignKey('announcements.id'), primary_key=True)
 )
-# --- Конец ассоциативной таблицы ---
 
 class User(Base):
     __tablename__ = "users"
@@ -26,17 +25,15 @@ class User(Base):
     sent_messages = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender")
     received_messages = relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver")
 
-    # --- Добавляем связь с Избранным ---
     favorite_announcements = relationship(
         "Announcement",
-        secondary=favorites_table, # Указываем ассоциативную таблицу
-        back_populates="favorited_by_users" # Имя обратной связи в Announcement
+        secondary=favorites_table, 
+        back_populates="favorited_by_users" 
     )
-    # --- Конец связи с Избранным ---
+
 
 
 class Pet(Base):
-    # ... (код модели Pet без изменений) ...
     __tablename__ = "pets"
     id = Column(Integer, primary_key=True, index=True)
     animal_type = Column(String, index=True)
@@ -68,17 +65,15 @@ class Announcement(Base):
     pet = relationship("Pet", back_populates="announcements", cascade="all, delete-orphan", single_parent=True)
     messages = relationship("Message", back_populates="announcement", cascade="all, delete-orphan")
 
-    # --- Добавляем обратную связь с Избранным ---
     favorited_by_users = relationship(
         "User",
-        secondary=favorites_table, # Указываем ассоциативную таблицу
-        back_populates="favorite_announcements" # Имя связи в User
+        secondary=favorites_table, 
+        back_populates="favorite_announcements" 
     )
-    # --- Конец обратной связи с Избранным ---
+
 
 
 class Message(Base):
-    # ... (код модели Message без изменений) ...
     __tablename__ = "messages"
     id = Column(Integer, primary_key=True, index=True)
     sender_id = Column(Integer, ForeignKey("users.id"))
@@ -90,11 +85,3 @@ class Message(Base):
     receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_messages")
     announcement = relationship("Announcement", back_populates="messages")
 
-# TODO: Позже добавить модель/таблицу для избранного (Favorites)
-# Например:
-# class Favorite(Base):
-#    __tablename__ = "favorites"
-#    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-#    announcement_id = Column(Integer, ForeignKey("announcements.id"), primary_key=True)
-#    user = relationship("User") # Связь с User
-#    announcement = relationship("Announcement") # Связь с Announcement
