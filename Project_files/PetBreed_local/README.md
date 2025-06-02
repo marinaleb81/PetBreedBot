@@ -96,13 +96,11 @@
     * Убедитесь, что там есть ваш `SECRET_KEY` и `TELEGRAM_BOT_TOKEN`.
     * Строку `DATABASE_URL` можно закомментировать или удалить, так как `database.py` теперь настроен на SQLite.
         ```env
-        # DATABASE_URL=... (Закомментировано или удалено)
-
-        SECRET_KEY=<Ваш_локальный_секретный_ключ> # Может быть таким же или другим
-        ALGORITHM=HS256
-        TELEGRAM_BOT_TOKEN=<Ваш_Telegram_Bot_Token>
-        MISTRAL_TOKEN=<Ваш_Mistral_Token_если_есть>
-        # GOOGLE_APPLICATION_CREDENTIALS=путь/к/локальному/ключу.json (если нужно)
+		SECRET_KEY=<Ваш_локальный_секретный_ключ>
+		GOOGLE_APPLICATION_CREDENTIALS=путь/к/локальному/ключу.json
+		MISTRAL_TOKEN=<Ваш_MISTRAL_Token>
+		TELEGRAM_BOT_TOKEN=<Ваш_Telegram_Bot_Token>
+		GEMINI_API_KEY=<Ваш_GEMINI_API_KEY_Token>
         ```
 
 ## Инициализация базы данных (SQLite)
@@ -174,4 +172,4 @@
     * Веб-приложение должно открыться внутри Telegram, используя ngrok URL.
     * Поскольку приложение открывается с ngrok URL, а не с `localhost`, **тестовый режим в `script.js` не активируется**, и должна использоваться реальная аутентификация Telegram через `initData`. Протестируйте функции, требующие входа.
 
-Теперь у вас все три компонента (Uvicorn, ngrok, Telegram-бот) запущены локально, и вы можете тестировать связку Telegram Web App -> ngrok -> локальный FastAPI. Следите за логами во всех трех терминалах.
+Теперь у вас все три компонента (Uvicorn, ngrok, Telegram-бот) запущены локально, и вы можете тестировать связку Telegram Web App -> ngrok -> локальный FastAPI. 
